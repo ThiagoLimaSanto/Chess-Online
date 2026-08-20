@@ -1,0 +1,49 @@
+package com.xadrez.chess_backend.model;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import org.hibernate.annotations.CreationTimestamp;
+
+import com.xadrez.chess_backend.enums.PieceType;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "moves")
+@NoArgsConstructor
+@Getter
+public class Move {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @ManyToOne
+    @JoinColumn(name = "game_id")
+    private Game game;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User player;
+
+    private String fromSquare;
+    private String toSquare;
+
+    @Enumerated(EnumType.STRING)
+    private PieceType piece;
+    private int moveNumber;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+}
