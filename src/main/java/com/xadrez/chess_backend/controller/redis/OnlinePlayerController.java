@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.xadrez.chess_backend.service.redis.OnlinePlayerService;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/players")
