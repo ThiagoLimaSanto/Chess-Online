@@ -23,8 +23,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping
-    @RequestMapping("/create")
+    @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse creteUser(@Valid @RequestBody CreateUserRequest request) {
         return userService.createUser(request);

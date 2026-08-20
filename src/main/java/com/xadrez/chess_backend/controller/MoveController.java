@@ -24,8 +24,7 @@ public class MoveController {
     
     private final MoveService moveService;
 
-    @PostMapping
-    @RequestMapping("/{gameId}/moves")
+    @PostMapping("/{gameId}/make-move")
     @ResponseStatus(HttpStatus.CREATED)
     public MoveResponse makeMove(@Valid @RequestBody MakeMoveRequest request, @PathVariable UUID gameId) {
         return moveService.makeMove(request, gameId);

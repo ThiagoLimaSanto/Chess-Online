@@ -21,8 +21,7 @@ public class GameController {
 
     private final GameService gameService;
     
-    @PostMapping
-    @RequestMapping("/create")
+    @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
     public GameResponse createGame(@Valid @RequestBody CreateGameRequest request) {
         return gameService.createGame(request);
