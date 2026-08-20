@@ -9,6 +9,7 @@ import com.xadrez.chess_backend.dto.user.CreateUserRequest;
 import com.xadrez.chess_backend.dto.user.UserResponse;
 import com.xadrez.chess_backend.service.UserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class UserController {
     @PostMapping
     @RequestMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse creteUser(@RequestBody CreateUserRequest request) {
+    public UserResponse creteUser(@Valid @RequestBody CreateUserRequest request) {
         return userService.createUser(request);
     }
 }

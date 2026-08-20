@@ -11,6 +11,7 @@ import com.xadrez.chess_backend.dto.game.CreateGameRequest;
 import com.xadrez.chess_backend.dto.game.GameResponse;
 import com.xadrez.chess_backend.service.GameService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -23,7 +24,7 @@ public class GameController {
     @PostMapping
     @RequestMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public GameResponse createGame(@RequestBody CreateGameRequest request) {
+    public GameResponse createGame(@Valid @RequestBody CreateGameRequest request) {
         return gameService.createGame(request);
     }
 }

@@ -14,6 +14,7 @@ import com.xadrez.chess_backend.dto.move.MakeMoveRequest;
 import com.xadrez.chess_backend.dto.move.MoveResponse;
 import com.xadrez.chess_backend.service.MoveService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -26,7 +27,7 @@ public class MoveController {
     @PostMapping
     @RequestMapping("/{gameId}/moves")
     @ResponseStatus(HttpStatus.CREATED)
-    public MoveResponse makeMove(@RequestBody MakeMoveRequest request, @PathVariable UUID gameId) {
+    public MoveResponse makeMove(@Valid @RequestBody MakeMoveRequest request, @PathVariable UUID gameId) {
         return moveService.makeMove(request, gameId);
     }
 }

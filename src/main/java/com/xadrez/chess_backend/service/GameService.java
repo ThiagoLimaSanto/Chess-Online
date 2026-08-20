@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.xadrez.chess_backend.dto.game.CreateGameRequest;
 import com.xadrez.chess_backend.dto.game.GameResponse;
+import com.xadrez.chess_backend.exception.UserNotFoundException;
 import com.xadrez.chess_backend.model.Game;
 import com.xadrez.chess_backend.model.User;
 import com.xadrez.chess_backend.repository.GameRepository;
@@ -19,9 +20,9 @@ public class GameService {
     private final UserRepository userRepository;
 
     public GameResponse createGame(CreateGameRequest request) {
-        User whitePlayer = userRepository.findById(request.getWhitePlayer()).orElseThrow();
+        User whitePlayer = userRepository.findById(request.getWhitePlayer()).orElseThrow(() -> new UserNotFoundException("Player branco não encontrado"));
 
-        User blackPlayer = userRepository.findById(request.getBlackPlayer()).orElseThrow();
+        User blackPlayer = userRepository.findById(request.getBlackPlayer()).orElseThrow(() -> new UserNotFoundException("Player preto não encontrado"));
 
         Game game = new Game();
 
