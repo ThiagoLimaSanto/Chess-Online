@@ -12,6 +12,6 @@ import lombok.Setter;
 public class CreateUserRequest {
 
     @NotBlank(message = "Nome do usuário não pode ser vazio")
-    @Size(min = 3, message = "nome do usuário deve ter mais de 3 caracteres")
+    @Size(min = 3, message = "Nome do usuário deve ter pelo menos 3 caracteres")
     private String username;
 }

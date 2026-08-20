@@ -1,17 +1,59 @@
 package com.xadrez.chess_backend.exception;
 
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.xadrez.chess_backend.dto.error.ErrorResponse;
 
+import tools.jackson.databind.exc.InvalidFormatException;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleUnreadableMessage(
+            HttpMessageNotReadableException exception) {
+
+        Throwable cause = exception.getMostSpecificCause();
+        String message = "Corpo da requisição inválido.";
+
+        if (cause instanceof InvalidFormatException invalidFormatException
+                && invalidFormatException.getTargetType() == UUID.class) {
+            message = "O campo " + invalidFormatException.getPath().getFirst().getPropertyName()
+                    + " deve estar no formato UUID válido.";
+        }
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                message);
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(
+            MethodArgumentTypeMismatchException exception) {
+
+        String message = exception.getRequiredType() == UUID.class
+                ? exception.getName() + " deve estar no formato UUID válido."
+                : exception.getName() + " possui um valor inválido.";
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                message);
+
+        return ResponseEntity.badRequest().body(response);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(
