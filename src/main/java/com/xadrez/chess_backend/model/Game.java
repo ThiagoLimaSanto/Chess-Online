@@ -32,11 +32,11 @@ public class Game {
 
     @ManyToOne
     @JoinColumn(name = "white_player_id")
-    private User whitePlayerId;
+    private User whitePlayer;
 
     @ManyToOne
     @JoinColumn(name = "black_player_id")
-    private User blackPlayerId;
+    private User blackPlayer;
 
     @Enumerated(EnumType.STRING)
     private GameStatus status;
@@ -48,4 +48,13 @@ public class Game {
     private LocalDateTime createdAt;
 
     private LocalDateTime finishedAt;
+
+    public void setPlayers(User whitePlayer, User blackPlayer) {
+        this.whitePlayer = whitePlayer;
+        this.blackPlayer = blackPlayer;
+    }
+
+    public void start() {
+        this.status = GameStatus.IN_PROGRESS;
+    }
 }
