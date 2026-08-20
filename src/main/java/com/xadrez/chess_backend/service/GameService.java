@@ -26,6 +26,9 @@ public class GameService {
 
         Game game = new Game();
 
+        game.setWhitePlayer(whitePlayer);
+        game.setBlackPlayer(blackPlayer);
+
         Game savedGame = gameRepository.save(game);
 
         return new GameResponse(savedGame);

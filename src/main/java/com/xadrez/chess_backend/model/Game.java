@@ -19,6 +19,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "games")
@@ -32,10 +33,12 @@ public class Game {
 
     @ManyToOne
     @JoinColumn(name = "white_player_id")
+    @Setter
     private User whitePlayer;
 
     @ManyToOne
     @JoinColumn(name = "black_player_id")
+    @Setter
     private User blackPlayer;
 
     @Enumerated(EnumType.STRING)

@@ -10,6 +10,10 @@ import java.util.UUID;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.xadrez.chess_backend.dto.game.CreateGameRequest;
+import com.xadrez.chess_backend.dto.game.GameResponse;
+import com.xadrez.chess_backend.service.GameService;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -17,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class MatchMakingService {
 
     private static final String MATCH_MAKING_QUEUE_KEY = "matchmaking:queue";
+    private final GameService gameService;
 
     private final StringRedisTemplate redisTemplate;
 
@@ -41,11 +46,11 @@ public class MatchMakingService {
         return players != null ? players : Set.of();
     }
 
-    public List<UUID> findMatch() {
+    public GameResponse findMatch() {
         Set<String> players = redisTemplate.opsForSet().members(MATCH_MAKING_QUEUE_KEY);
 
         if (players == null || players.size() < 2) {
-            return List.of();
+            return null;
         }
 
         List<UUID> playerList = players.stream()
@@ -58,8 +63,14 @@ public class MatchMakingService {
         UUID whitePlayer = selectedPlayers.next();
         UUID blackPlayer = selectedPlayers.next();
 
-        redisTemplate.opsForSet().remove(MatchMakingService.MATCH_MAKING_QUEUE_KEY, whitePlayer.toString(), blackPlayer.toString());
+        redisTemplate.opsForSet().remove(MatchMakingService.MATCH_MAKING_QUEUE_KEY, whitePlayer.toString(),
+                blackPlayer.toString());
 
-        return List.of(whitePlayer, blackPlayer);
+        CreateGameRequest request = new CreateGameRequest();
+
+        request.setWhitePlayer(whitePlayer);
+        request.setBlackPlayer(blackPlayer);
+
+        return gameService.createGame(request);
     }
 }

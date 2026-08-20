@@ -1,6 +1,5 @@
 package com.xadrez.chess_backend.controller.redis;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -12,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.xadrez.chess_backend.dto.game.GameResponse;
+import com.xadrez.chess_backend.exception.GameNotFoundException;
 import com.xadrez.chess_backend.service.redis.MatchMakingService;
 
 import lombok.RequiredArgsConstructor;
@@ -47,7 +48,13 @@ public class MatchMakingController {
     }
 
     @GetMapping("/find-match")
-    public ResponseEntity<List<UUID>> findMatch() {
-        return ResponseEntity.ok(matchMakingService.findMatch());
+    public ResponseEntity<GameResponse> findMatch() {
+        GameResponse game = matchMakingService.findMatch();
+
+        if (game == null) {
+            throw new GameNotFoundException("Não foi possível encontrar um jogo para você");
+        }
+
+        return ResponseEntity.ok(game);
     }
 }
