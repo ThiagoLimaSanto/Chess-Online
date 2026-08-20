@@ -1,4 +1,4 @@
-package com.xadrez.chess_backend.service.redis;
+package com.xadrez.chess_backend.redis;
 
 import java.util.ArrayList;
 import java.util.Collections;

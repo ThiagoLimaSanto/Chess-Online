@@ -1,4 +1,4 @@
-package com.xadrez.chess_backend.controller.redis;
+package com.xadrez.chess_backend.redis;
 
 import java.util.Set;
 import java.util.UUID;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.xadrez.chess_backend.dto.game.GameResponse;
 import com.xadrez.chess_backend.exception.GameNotFoundException;
-import com.xadrez.chess_backend.service.redis.MatchMakingService;
 
 import lombok.RequiredArgsConstructor;
 

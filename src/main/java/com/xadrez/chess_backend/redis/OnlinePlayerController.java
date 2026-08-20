@@ -1,4 +1,4 @@
-package com.xadrez.chess_backend.controller.redis;
+package com.xadrez.chess_backend.redis;
 
 import java.util.Set;
 import java.util.UUID;
@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.xadrez.chess_backend.service.redis.OnlinePlayerService;
 
 import lombok.RequiredArgsConstructor;
 

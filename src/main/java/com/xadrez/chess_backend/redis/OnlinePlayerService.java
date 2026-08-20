@@ -1,4 +1,4 @@
-package com.xadrez.chess_backend.service.redis;
+package com.xadrez.chess_backend.redis;
 
 import java.time.Duration;
 import java.util.Set;
