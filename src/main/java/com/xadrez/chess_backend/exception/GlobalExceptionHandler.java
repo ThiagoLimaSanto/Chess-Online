@@ -18,6 +18,22 @@ import tools.jackson.databind.exc.InvalidFormatException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler({
+            GameNotStartedException.class,
+            GameAlreadyStartedException.class,
+            GameAlreadyFinishedException.class
+    })
+    public ResponseEntity<ErrorResponse> handleGameStateConflict(
+            RuntimeException e) {
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleUnreadableMessage(
             HttpMessageNotReadableException exception) {
@@ -127,20 +143,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotYourTurnException.class)
     public ResponseEntity<ErrorResponse> handleNotYourTurn(
             NotYourTurnException e) {
-
-        ErrorResponse response = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                "Bad Request",
-                e.getMessage());
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(response);
-    }
-
-    @ExceptionHandler(GameAlreadyFinishedException.class)
-    public ResponseEntity<ErrorResponse> handleGameAlreadyFinished(
-            GameAlreadyFinishedException e) {
 
         ErrorResponse response = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),

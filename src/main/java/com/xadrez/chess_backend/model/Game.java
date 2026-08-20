@@ -7,6 +7,10 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.xadrez.chess_backend.enums.GameResult;
 import com.xadrez.chess_backend.enums.GameStatus;
+import com.xadrez.chess_backend.state.game.GameState;
+import com.xadrez.chess_backend.state.game.FinishedState;
+import com.xadrez.chess_backend.state.game.InProgressState;
+import com.xadrez.chess_backend.state.game.WaitingState;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,7 +20,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -49,12 +55,58 @@ public class Game {
 
     private LocalDateTime finishedAt;
 
+    @Transient
+    private GameState state = new WaitingState();
+
     public void setPlayers(User whitePlayer, User blackPlayer) {
         this.whitePlayer = whitePlayer;
         this.blackPlayer = blackPlayer;
     }
 
     public void start() {
-        this.status = GameStatus.IN_PROGRESS;
+        state.start(this);
+    }
+
+    public void finish(GameResult result) {
+        state.finish(this, result);
+    }
+
+    public void changeState(GameState state) {
+        this.state = state;
+        this.status = statusFor(state);
+    }
+
+    public void setResult(GameResult result) {
+        this.result = result;
+    }
+
+    public void setFinishedAt(LocalDateTime finishedAt) {
+        this.finishedAt = finishedAt;
+    }
+
+    @PostLoad
+    private void restoreState() {
+        this.state = stateFor(status);
+    }
+
+    private GameStatus statusFor(GameState state) {
+        if (state instanceof WaitingState) {
+            return GameStatus.WAITING;
+        }
+        if (state instanceof InProgressState) {
+            return GameStatus.IN_PROGRESS;
+        }
+        if (state instanceof FinishedState) {
+            return GameStatus.FINISHED;
+        }
+        throw new IllegalArgumentException("Unsupported game state: " + state.getClass().getName());
+    }
+
+    private GameState stateFor(GameStatus status) {
+        return switch (status) {
+            case WAITING -> new WaitingState();
+            case IN_PROGRESS -> new InProgressState();
+            case FINISHED -> new FinishedState();
+        };
     }
 }
