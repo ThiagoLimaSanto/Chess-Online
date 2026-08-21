@@ -18,8 +18,8 @@ public class BoardFactory {
     public Board createInitialBoard() {
         Board board = new Board();
 
-        setupPieces(board, PieceColor.WHITE, 0, 7);
-        setupPieces(board, PieceColor.BLACK, 7, 0);
+        setupPieces(board, PieceColor.WHITE, 0, 1);
+        setupPieces(board, PieceColor.BLACK, 7, 6);
 
         return board;
     }

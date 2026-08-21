@@ -1,3 +1,4 @@
+
 package com.xadrez.chess_backend.strategy.chess;
 
 import org.springframework.stereotype.Component;
@@ -21,6 +22,9 @@ public class PawnMoveStrategy implements MoveStrategy {
         if (!(piece instanceof Pawn))
             return false;
 
+        if (!board.isInside(to))
+            return false;
+
         int direction = piece.getColor() == PieceColor.WHITE ? 1 : -1;
 
         int initialRow = piece.getColor() == PieceColor.WHITE ? 1 : 6;
@@ -41,5 +45,28 @@ public class PawnMoveStrategy implements MoveStrategy {
             return board.isEnemy(to, piece.getColor());
 
         return false;
+    }
+
+    @Override
+    public boolean canAttack(
+            Board board,
+            Position from,
+            Position to) {
+
+        if (!board.isInside(to)) {
+            return false;
+        }
+
+        Piece piece = board.getPiece(from);
+        if (!(piece instanceof Pawn)) {
+            return false;
+        }
+
+        int direction = piece.getColor() == PieceColor.WHITE ? 1 : -1;
+        int rowDifference = to.row() - from.row();
+        int columnDifference = to.column() - from.column();
+
+        return rowDifference == direction
+                && Math.abs(columnDifference) == 1;
     }
 }

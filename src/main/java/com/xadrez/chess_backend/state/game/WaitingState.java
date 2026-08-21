@@ -1,16 +1,30 @@
 package com.xadrez.chess_backend.state.game;
 
+import org.springframework.stereotype.Component;
+
 import com.xadrez.chess_backend.enums.GameResult;
+import com.xadrez.chess_backend.enums.GameStatus;
 import com.xadrez.chess_backend.exception.GameNotStartedException;
 import com.xadrez.chess_backend.exception.InvalidMoveException;
 import com.xadrez.chess_backend.model.Game;
 import com.xadrez.chess_backend.model.Move;
 
+import lombok.RequiredArgsConstructor;
+
+@Component
+@RequiredArgsConstructor
 public class WaitingState implements GameState {
+
+    private final InProgressState inProgressState;
+
+    @Override
+    public GameStatus status() {
+        return GameStatus.WAITING;
+    }
 
     @Override
     public void start(Game game) {
-        game.changeState(new InProgressState());
+        game.changeState(inProgressState);
     }
 
     @Override

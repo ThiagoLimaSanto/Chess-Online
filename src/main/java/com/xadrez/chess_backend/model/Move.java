@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.xadrez.chess_backend.enums.PieceType;
+import com.xadrez.chess_backend.record.Position;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -24,7 +25,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 public class Move {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -37,11 +38,12 @@ public class Move {
     @JoinColumn(name = "user_id")
     private User player;
 
-    private String fromSquare;
-    private String toSquare;
+    private Position fromSquare;
+    private Position toSquare;
 
     @Enumerated(EnumType.STRING)
-    private PieceType piece;
+    private PieceType promotionType;
+    
     private int moveNumber;
 
     @CreationTimestamp

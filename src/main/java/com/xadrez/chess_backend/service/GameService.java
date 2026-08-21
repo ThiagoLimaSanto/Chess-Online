@@ -6,6 +6,7 @@ import com.xadrez.chess_backend.dto.game.CreateGameRequest;
 import com.xadrez.chess_backend.dto.game.GameResponse;
 import com.xadrez.chess_backend.exception.UserNotFoundException;
 import com.xadrez.chess_backend.factory.GameFactory;
+import com.xadrez.chess_backend.factory.GameStateFactory;
 import com.xadrez.chess_backend.model.Game;
 import com.xadrez.chess_backend.model.User;
 import com.xadrez.chess_backend.repository.GameRepository;
@@ -17,9 +18,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GameService {
 
-    private final GameFactory gameFactory;
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
+    private final GameFactory gameFactory;
+    private final GameStateFactory gameStateFactory;
 
     public GameResponse createGame(CreateGameRequest request) {
         User whitePlayer = userRepository.findById(request.getWhitePlayer())
