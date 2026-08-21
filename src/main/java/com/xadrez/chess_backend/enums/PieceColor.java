@@ -1,5 +1,5 @@
 package com.xadrez.chess_backend.enums;
 
-public enum Color {
+public enum PieceColor {
     BLACK, WHITE
 }
