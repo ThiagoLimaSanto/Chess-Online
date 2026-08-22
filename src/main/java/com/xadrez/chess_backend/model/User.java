@@ -29,6 +29,13 @@ public class User {
     @Column(nullable = false, unique = true, length = 50)
     private String username;
 
+    @Column(name = "password_hash", nullable = false, length = 100)
+    private String passwordHash;
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 }
