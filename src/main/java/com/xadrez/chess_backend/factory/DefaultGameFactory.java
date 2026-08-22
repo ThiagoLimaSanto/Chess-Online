@@ -22,8 +22,7 @@ public class DefaultGameFactory implements GameFactory {
 
         game.setPlayers(whitePlayer, blackPlayer);
         game.setBoard(boardFactory.createInitialBoard());
-        game.restoreState(gameStateFactory.waiting());
-        game.start();
+        game.changeState(gameStateFactory.inProgress());
         
         return game;
     }

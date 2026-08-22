@@ -1,10 +1,14 @@
 package com.xadrez.chess_backend.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.xadrez.chess_backend.enums.PieceColor;
+import com.xadrez.chess_backend.model.Move;
 import com.xadrez.chess_backend.model.chess.Board;
 import com.xadrez.chess_backend.model.chess.King;
+import com.xadrez.chess_backend.model.chess.Pawn;
 import com.xadrez.chess_backend.model.chess.Piece;
 import com.xadrez.chess_backend.record.Position;
 import com.xadrez.chess_backend.strategy.chess.MoveStrategy;
@@ -42,16 +46,25 @@ public class CheckService {
             Board board,
             PieceColor color) {
 
+        return isCheckMate(board, color, List.of());
+    }
+
+    public boolean isCheckMate(
+            Board board,
+            PieceColor color,
+            List<Move> moves) {
+
         if (!isCheck(board, color)) {
             return false;
         }
 
-        return !hasLegalMove(board, color);
+        return !hasLegalMove(board, color, moves);
     }
 
     private boolean hasLegalMove(
             Board board,
-            PieceColor color) {
+            PieceColor color,
+            List<Move> moves) {
 
         for (var entry : board.getPieces().entrySet()) {
 
@@ -71,7 +84,8 @@ public class CheckService {
 
                     Position to = new Position(row, column);
 
-                    if (!strategy.isValidMove(board, from, to)) {
+                    boolean enPassant = isEnPassantMove(board, moves, piece, from, to);
+                    if (!enPassant && !strategy.isValidMove(board, from, to)) {
                         continue;
                     }
 
@@ -86,6 +100,9 @@ public class CheckService {
                     Board simulatedBoard = board.copy();
 
                     simulatedBoard.movePiece(from, to);
+                    if (enPassant) {
+                        simulatedBoard.removePiece(new Position(from.row(), to.column()));
+                    }
 
                     if (!isCheck(simulatedBoard, color)) {
                         return true;
@@ -95,6 +112,26 @@ public class CheckService {
         }
 
         return false;
+    }
+
+    private boolean isEnPassantMove(Board board, List<Move> moves, Piece piece,
+            Position from, Position to) {
+        if (!(piece instanceof Pawn) || moves.isEmpty() || !board.isEmpty(to)) {
+            return false;
+        }
+
+        int direction = piece.getColor() == PieceColor.WHITE ? 1 : -1;
+        if (to.row() - from.row() != direction || Math.abs(to.column() - from.column()) != 1) {
+            return false;
+        }
+
+        Move lastMove = moves.getLast();
+        Piece adjacentPiece = board.getPiece(new Position(from.row(), to.column()));
+        return adjacentPiece instanceof Pawn
+                && adjacentPiece.getColor() != piece.getColor()
+                && lastMove.getFromSquare().column() == to.column()
+                && lastMove.getToSquare().equals(new Position(from.row(), to.column()))
+                && Math.abs(lastMove.getToSquare().row() - lastMove.getFromSquare().row()) == 2;
     }
 
     private Position findKing(Board board, PieceColor color) {

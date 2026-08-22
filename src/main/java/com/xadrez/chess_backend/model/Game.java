@@ -44,7 +44,7 @@ public class Game {
     private User blackPlayer;
 
     @Enumerated(EnumType.STRING)
-    private GameStatus status = GameStatus.WAITING;
+    private GameStatus status = GameStatus.IN_PROGRESS;
 
     @Enumerated(EnumType.STRING)
     private GameResult result;

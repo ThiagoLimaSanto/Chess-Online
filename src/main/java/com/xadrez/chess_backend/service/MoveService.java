@@ -14,8 +14,6 @@ import com.xadrez.chess_backend.exception.GameNotFoundException;
 import com.xadrez.chess_backend.exception.InvalidMoveException;
 import com.xadrez.chess_backend.exception.NotYourTurnException;
 import com.xadrez.chess_backend.exception.PlayerNotInGameException;
-import com.xadrez.chess_backend.factory.BoardFactory;
-import com.xadrez.chess_backend.factory.GameStateFactory;
 import com.xadrez.chess_backend.model.Game;
 import com.xadrez.chess_backend.model.Move;
 import com.xadrez.chess_backend.model.User;
@@ -35,9 +33,8 @@ public class MoveService {
     private final MoveRepository moveRepository;
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
-    private final BoardFactory boardFactory;
-    private final GameStateFactory gameStateFactory;
     private final CheckService checkService;
+    private final GameRestorationService gameRestorationService;
 
     @Transactional
     public MoveResponse makeMove(MakeMoveRequest request, UUID gameId) {
@@ -47,7 +44,7 @@ public class MoveService {
                 .orElseThrow(() -> new PlayerNotInGameException("Jogador não encontrado"));
 
         List<Move> moves = moveRepository.findByGameIdOrderByMoveNumberAsc(gameId);
-        restoreGame(game, moves);
+        gameRestorationService.restore(game, moves);
 
         PieceColor playerColor = colorFor(game, player);
         validateTurn(playerColor, moves.size());
@@ -75,26 +72,13 @@ public class MoveService {
         }
 
         PieceColor opponentColor = opposite(playerColor);
-        if (checkService.isCheckMate(game.getBoard(), opponentColor)) {
+        if (checkService.isCheckMate(game.getBoard(), opponentColor, game.getMoves())) {
             game.finish(playerColor == PieceColor.WHITE ? GameResult.WHITE_WIN : GameResult.BLACK_WIN);
         }
 
         Move savedMove = moveRepository.save(move);
         gameRepository.save(game);
         return new MoveResponse(savedMove, movingPiece.getType());
-    }
-
-    private void restoreGame(Game game, List<Move> moves) {
-        game.setBoard(boardFactory.createInitialBoard());
-        game.setMoves(List.of());
-        game.restoreState(gameStateFactory.inProgress());
-
-        for (Move move : moves) {
-            game.makeMove(move);
-            game.addMove(move);
-        }
-
-        game.restoreState(gameStateFactory.forStatus(game.getStatus()));
     }
 
     private PieceColor colorFor(Game game, User player) {

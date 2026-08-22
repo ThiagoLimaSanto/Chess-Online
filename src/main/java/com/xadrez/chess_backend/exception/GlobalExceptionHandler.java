@@ -19,7 +19,6 @@ import tools.jackson.databind.exc.InvalidFormatException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({
-            GameNotStartedException.class,
             GameAlreadyStartedException.class,
             GameAlreadyFinishedException.class
     })

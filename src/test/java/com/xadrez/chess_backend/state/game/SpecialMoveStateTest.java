@@ -17,6 +17,7 @@ import com.xadrez.chess_backend.model.chess.Pawn;
 import com.xadrez.chess_backend.model.chess.Rook;
 import com.xadrez.chess_backend.record.Position;
 import com.xadrez.chess_backend.service.CheckService;
+import com.xadrez.chess_backend.service.SpecialMoveService;
 import com.xadrez.chess_backend.strategy.chess.BishopMoveStrategy;
 import com.xadrez.chess_backend.strategy.chess.KingMoveStrategy;
 import com.xadrez.chess_backend.strategy.chess.KnightMoveStrategy;
@@ -69,7 +70,8 @@ class SpecialMoveStateTest {
         MoveStrategyFactory strategies = new MoveStrategyFactory(
                 new PawnMoveStrategy(), new QueenMoveStrategy(), new RookMoveStrategy(),
                 new KnightMoveStrategy(), new BishopMoveStrategy(), new KingMoveStrategy());
+        CheckService checkService = new CheckService(strategies);
         return new InProgressState(strategies, new ChessPromotionFactory(), new FinishedState(),
-                new CheckService(strategies));
+                new SpecialMoveService(checkService));
     }
 }

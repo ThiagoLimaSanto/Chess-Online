@@ -15,8 +15,6 @@ import com.xadrez.chess_backend.dto.move.MoveHistoryResponse;
 import com.xadrez.chess_backend.exception.GameNotFoundException;
 import com.xadrez.chess_backend.exception.UserNotFoundException;
 import com.xadrez.chess_backend.factory.GameFactory;
-import com.xadrez.chess_backend.factory.BoardFactory;
-import com.xadrez.chess_backend.factory.GameStateFactory;
 import com.xadrez.chess_backend.exception.InvalidMoveException;
 import com.xadrez.chess_backend.model.Game;
 import com.xadrez.chess_backend.model.Move;
@@ -35,8 +33,7 @@ public class GameService {
     private final UserRepository userRepository;
     private final GameFactory gameFactory;
     private final MoveRepository moveRepository;
-    private final BoardFactory boardFactory;
-    private final GameStateFactory gameStateFactory;
+    private final GameRestorationService gameRestorationService;
 
     public GameResponse createGame(CreateGameRequest request) {
         if (request.getWhitePlayer().equals(request.getBlackPlayer())) {
@@ -60,7 +57,7 @@ public class GameService {
     public GameDetailsResponse getGameDetails(UUID gameId) {
         Game game = findGame(gameId);
         List<Move> moves = moveRepository.findByGameIdOrderByMoveNumberAsc(gameId);
-        restoreGame(game, moves);
+        gameRestorationService.restore(game, moves);
 
         List<PiecePositionResponse> board = game.getBoard().getPieces().entrySet().stream()
                 .sorted(Comparator.comparingInt((java.util.Map.Entry<com.xadrez.chess_backend.record.Position,
@@ -81,19 +78,6 @@ public class GameService {
     private Game findGame(UUID gameId) {
         return gameRepository.findById(gameId)
                 .orElseThrow(() -> new GameNotFoundException("Partida não encontrada"));
-    }
-
-    private void restoreGame(Game game, List<Move> moves) {
-        game.setBoard(boardFactory.createInitialBoard());
-        game.setMoves(List.of());
-        game.restoreState(gameStateFactory.inProgress());
-
-        for (Move move : moves) {
-            game.makeMove(move);
-            game.addMove(move);
-        }
-
-        game.restoreState(gameStateFactory.forStatus(game.getStatus()));
     }
 
     private List<MoveHistoryResponse> toMoveHistory(List<Move> moves) {
