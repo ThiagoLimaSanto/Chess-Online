@@ -9,6 +9,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import com.xadrez.chess_backend.record.MoveMadeEvent;
 import com.xadrez.chess_backend.record.GameFinishedEvent;
 import com.xadrez.chess_backend.record.GameAbandonedEvent;
+import com.xadrez.chess_backend.record.GameCreatedEvent;
 
 @Component
 public class GameEventListener {
@@ -29,5 +30,10 @@ public class GameEventListener {
     public void onGameAbandoned(GameAbandonedEvent event) {
         log.info("Jogador {} abandonou a partida {}; resultado {}", event.abandonedPlayerId(), event.gameId(),
                 event.result());
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onGameCreated(GameCreatedEvent event) {
+        log.info("Partida {} criada entre {} e {}", event.gameId(), event.whitePlayerId(), event.blackPlayerId());
     }
 }

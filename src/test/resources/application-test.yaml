@@ -11,6 +11,8 @@ spring:
     redis:
       host: localhost
       port: 6379
+  flyway:
+    enabled: false
 
 logging:
   level:

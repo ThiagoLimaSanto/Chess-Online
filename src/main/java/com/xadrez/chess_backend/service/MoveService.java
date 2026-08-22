@@ -38,6 +38,7 @@ public class MoveService {
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
     private final CheckService checkService;
+    private final DrawService drawService;
     private final GameRestorationService gameRestorationService;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -79,6 +80,11 @@ public class MoveService {
         PieceColor opponentColor = opposite(playerColor);
         if (checkService.isCheckMate(game.getBoard(), opponentColor, game.getMoves())) {
             game.finish(playerColor == PieceColor.WHITE ? GameResult.WHITE_WIN : GameResult.BLACK_WIN);
+        } else if (checkService.isStaleMate(game.getBoard(), opponentColor, game.getMoves())
+                || drawService.isInsufficientMaterial(game.getBoard())
+                || drawService.isFiftyMoveRule(game, game.getMoves())
+                || drawService.isThreefoldRepetition(game, game.getMoves())) {
+            game.finish(GameResult.DRAW);
         }
 
         Move savedMove = moveRepository.save(move);

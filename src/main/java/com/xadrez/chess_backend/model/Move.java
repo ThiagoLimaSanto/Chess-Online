@@ -19,11 +19,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "moves")
+@Table(name = "moves", indexes = @Index(name = "idx_moves_game_move_number", columnList = "game_id,moveNumber"),
+        uniqueConstraints = @UniqueConstraint(name = "uk_moves_game_move_number", columnNames = { "game_id", "moveNumber" }))
 @NoArgsConstructor
 @Getter
 public class Move {
@@ -33,11 +36,11 @@ public class Move {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "game_id")
+    @JoinColumn(name = "game_id", nullable = false)
     private Game game;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User player;
 
     @Convert(converter = PositionConverter.class)

@@ -21,12 +21,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "games")
+@Table(name = "games", indexes = {
+        @Index(name = "idx_games_status_white_player", columnList = "status,white_player_id"),
+        @Index(name = "idx_games_status_black_player", columnList = "status,black_player_id")
+})
 @NoArgsConstructor
 @Getter
 public class Game {
@@ -36,11 +40,11 @@ public class Game {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "white_player_id")
+    @JoinColumn(name = "white_player_id", nullable = false)
     private User whitePlayer;
 
     @ManyToOne
-    @JoinColumn(name = "black_player_id")
+    @JoinColumn(name = "black_player_id", nullable = false)
     private User blackPlayer;
 
     @Enumerated(EnumType.STRING)

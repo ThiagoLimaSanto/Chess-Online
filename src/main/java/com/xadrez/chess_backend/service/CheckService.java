@@ -61,7 +61,11 @@ public class CheckService {
         return !hasLegalMove(board, color, moves);
     }
 
-    private boolean hasLegalMove(
+    public boolean isStaleMate(Board board, PieceColor color, List<Move> moves) {
+        return !isCheck(board, color) && !hasLegalMove(board, color, moves);
+    }
+
+    public boolean hasLegalMove(
             Board board,
             PieceColor color,
             List<Move> moves) {

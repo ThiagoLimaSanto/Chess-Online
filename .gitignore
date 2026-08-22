@@ -2,9 +2,6 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
 
-# Maven Wrapper
-.mvn/wrapper/maven-wrapper.jar
-
 # Spring Boot
 spring-boot-devtools.properties
 
@@ -19,6 +16,7 @@ logs/
 
 # Java
 *.class
+.attach_pid*
 
 # IntelliJ IDEA
 .idea/
@@ -51,3 +49,4 @@ Thumbs.db
 
 # MySQL Docker data
 mysql/data/
+resources/db/migration/V1__create_chess_schema.sql
