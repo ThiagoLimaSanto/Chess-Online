@@ -1,10 +1,12 @@
 package com.xadrez.chess_backend.strategy.chess;
 
+import org.springframework.stereotype.Component;
 import com.xadrez.chess_backend.model.chess.Bishop;
 import com.xadrez.chess_backend.model.chess.Board;
 import com.xadrez.chess_backend.model.chess.Piece;
 import com.xadrez.chess_backend.record.Position;
 
+@Component
 public class BishopMoveStrategy implements MoveStrategy {
 
     @Override

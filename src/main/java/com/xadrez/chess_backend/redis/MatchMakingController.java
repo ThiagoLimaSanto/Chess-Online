@@ -22,31 +22,31 @@ import lombok.RequiredArgsConstructor;
 public class MatchMakingController {
     private final MatchMakingService matchMakingService;
 
-    @PostMapping("/{id}/join-queue")
+    @PostMapping("/queue/{id}")
     public ResponseEntity<Void> joinQueue(@PathVariable UUID id) {
-        matchMakingService.JoinQueue(id);
+        matchMakingService.joinQueue(id);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/is-in-queue")
+    @GetMapping("/queue/{id}")
     public ResponseEntity<Boolean> isInQueue(@PathVariable UUID id) {
         return ResponseEntity.ok(matchMakingService.isInQueue(id));
     }
 
-    @GetMapping("/get-players")
+    @GetMapping("/queue")
     public ResponseEntity<Set<String>> getPlayersInQueue() {
         return ResponseEntity.ok(matchMakingService.getPlayersInQueue());
     }
 
-    @DeleteMapping("/{id}/leave-queue")
+    @DeleteMapping("/queue/{id}")
     public ResponseEntity<Void> leaveQueue(@PathVariable UUID id) {
         matchMakingService.leaveQueue(id);
 
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/find-match")
+    @PostMapping("/matches")
     public ResponseEntity<GameResponse> findMatch() {
         GameResponse game = matchMakingService.findMatch();
 

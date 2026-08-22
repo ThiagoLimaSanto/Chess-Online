@@ -2,6 +2,8 @@ package com.xadrez.chess_backend.model;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -58,6 +60,9 @@ public class Game {
     @Transient
     private Board board;
 
+    @Transient
+    private List<Move> moves = new ArrayList<>();
+
     public void setPlayers(User whitePlayer, User blackPlayer) {
         this.whitePlayer = whitePlayer;
         this.blackPlayer = blackPlayer;
@@ -94,6 +99,14 @@ public class Game {
 
     public void restoreState(GameState state) {
         this.state = state;
+    }
+
+    public void setMoves(List<Move> moves) {
+        this.moves = new ArrayList<>(moves);
+    }
+
+    public void addMove(Move move) {
+        moves.add(move);
     }
 
     private GameStatus statusFor(GameState state) {

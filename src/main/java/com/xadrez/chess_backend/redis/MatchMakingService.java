@@ -1,8 +1,5 @@
 package com.xadrez.chess_backend.redis;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -25,7 +22,7 @@ public class MatchMakingService {
 
     private final StringRedisTemplate redisTemplate;
 
-    public void JoinQueue(UUID playerId) {
+    public void joinQueue(UUID playerId) {
         redisTemplate.opsForSet().add(MATCH_MAKING_QUEUE_KEY, playerId.toString());
     }
 
@@ -47,30 +44,27 @@ public class MatchMakingService {
     }
 
     public GameResponse findMatch() {
-        Set<String> players = redisTemplate.opsForSet().members(MATCH_MAKING_QUEUE_KEY);
-
-        if (players == null || players.size() < 2) {
+        List<String> selectedPlayers = redisTemplate.opsForSet().pop(MATCH_MAKING_QUEUE_KEY, 2);
+        if (selectedPlayers == null || selectedPlayers.size() < 2) {
+            if (selectedPlayers != null && !selectedPlayers.isEmpty()) {
+                redisTemplate.opsForSet().add(MATCH_MAKING_QUEUE_KEY, selectedPlayers.getFirst());
+            }
             return null;
         }
 
-        List<UUID> playerList = players.stream()
-                .map(UUID::fromString)
-                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
-
-        Collections.shuffle(playerList);
-
-        Iterator<UUID> selectedPlayers = playerList.iterator();
-        UUID whitePlayer = selectedPlayers.next();
-        UUID blackPlayer = selectedPlayers.next();
-
-        redisTemplate.opsForSet().remove(MatchMakingService.MATCH_MAKING_QUEUE_KEY, whitePlayer.toString(),
-                blackPlayer.toString());
+        UUID whitePlayer = UUID.fromString(selectedPlayers.get(0));
+        UUID blackPlayer = UUID.fromString(selectedPlayers.get(1));
 
         CreateGameRequest request = new CreateGameRequest();
 
         request.setWhitePlayer(whitePlayer);
         request.setBlackPlayer(blackPlayer);
 
-        return gameService.createGame(request);
+        try {
+            return gameService.createGame(request);
+        } catch (RuntimeException exception) {
+            redisTemplate.opsForSet().add(MATCH_MAKING_QUEUE_KEY, whitePlayer.toString(), blackPlayer.toString());
+            throw exception;
+        }
     }
 }

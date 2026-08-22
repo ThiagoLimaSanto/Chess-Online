@@ -33,6 +33,7 @@ public class Board {
 
         pieces.remove(to);
 
+        piece.markMoved();
         pieces.put(to, piece);
     }
 
@@ -49,7 +50,7 @@ public class Board {
         Board copy = new Board();
 
         for (var entry : pieces.entrySet()) {
-            copy.setPiece(entry.getKey(), entry.getValue());
+            copy.setPiece(entry.getKey(), entry.getValue().copy());
         }
 
         return copy;

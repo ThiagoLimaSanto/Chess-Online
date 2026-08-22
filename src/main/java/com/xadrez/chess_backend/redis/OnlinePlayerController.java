@@ -20,31 +20,31 @@ public class OnlinePlayerController {
 
     private final OnlinePlayerService onlinePlayerService;
 
-    @PostMapping("/{id}/set-online")
+    @PostMapping("/{id}/online")
     public ResponseEntity<Void> setOnline(@PathVariable UUID id) {
         onlinePlayerService.setOnline(id);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/is-online")
+    @GetMapping("/{id}/online")
     public ResponseEntity<Boolean> isOnline(@PathVariable UUID id) {
         return ResponseEntity.ok(onlinePlayerService.isOnline(id));
     }
 
-    @GetMapping("/get-online")
+    @GetMapping
     public ResponseEntity<Set<String>> getOnlinePlayers() {
         return ResponseEntity.ok(onlinePlayerService.getOnlinePlayers());
     }
 
-    @DeleteMapping("/{id}/set-offline")
+    @DeleteMapping("/{id}/online")
     public ResponseEntity<Void> setOffline(@PathVariable UUID id) {
         onlinePlayerService.setOffline(id);
 
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}/heartbeat")
+    @PostMapping("/{id}/online/heartbeat")
     public ResponseEntity<Void> heartBeat(@PathVariable UUID id) {
         onlinePlayerService.heartBeat(id);
 

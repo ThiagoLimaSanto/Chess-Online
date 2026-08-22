@@ -79,6 +79,10 @@ public class CheckService {
                         continue;
                     }
 
+                    if (board.getPiece(to) instanceof King) {
+                        continue;
+                    }
+
                     Board simulatedBoard = board.copy();
 
                     simulatedBoard.movePiece(from, to);

@@ -1,7 +1,8 @@
 package com.xadrez.chess_backend.model.chess;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.xadrez.chess_backend.enums.PieceColor;
 import com.xadrez.chess_backend.record.Position;
@@ -20,9 +21,16 @@ class BoardTest {
         Board copy = original.copy();
         copy.movePiece(from, to);
 
-        assertSame(pawn, original.getPiece(from));
+        assertSamePiece(pawn, original.getPiece(from));
         assertNull(original.getPiece(to));
         assertNull(copy.getPiece(from));
-        assertSame(pawn, copy.getPiece(to));
+        assertNotSame(pawn, copy.getPiece(to));
+        assertSamePiece(pawn, copy.getPiece(to));
+    }
+
+    private void assertSamePiece(Piece expected, Piece actual) {
+        assertNotNull(actual);
+        org.junit.jupiter.api.Assertions.assertEquals(expected.getType(), actual.getType());
+        org.junit.jupiter.api.Assertions.assertEquals(expected.getColor(), actual.getColor());
     }
 }
