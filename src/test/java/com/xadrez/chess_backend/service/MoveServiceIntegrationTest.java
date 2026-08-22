@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.xadrez.chess_backend.dto.move.MakeMoveRequest;
 import com.xadrez.chess_backend.dto.move.MoveResponse;
 import com.xadrez.chess_backend.dto.game.GameDetailsResponse;
+import com.xadrez.chess_backend.enums.GameResult;
+import com.xadrez.chess_backend.enums.GameStatus;
 import com.xadrez.chess_backend.factory.GameFactory;
 import com.xadrez.chess_backend.model.Game;
 import com.xadrez.chess_backend.model.User;
@@ -58,6 +60,19 @@ class MoveServiceIntegrationTest {
         assertEquals(2, details.getMoves().size());
         org.junit.jupiter.api.Assertions.assertTrue(details.getBoard().stream()
                 .anyMatch(piece -> piece.getSquare().equals("e4") && piece.getType().name().equals("PAWN")));
+    }
+
+    @Test
+    void finishesGameWithOpponentVictoryWhenAPlayerAbandons() {
+        User white = saveUser("white-player");
+        User black = saveUser("black-player");
+        Game game = gameRepository.save(gameFactory.createGame(white, black));
+
+        gameService.abandonGame(game.getId(), white.getId());
+
+        Game finishedGame = gameRepository.findById(game.getId()).orElseThrow();
+        assertEquals(GameStatus.FINISHED, finishedGame.getStatus());
+        assertEquals(GameResult.BLACK_WIN, finishedGame.getResult());
     }
 
     private User saveUser(String username) {

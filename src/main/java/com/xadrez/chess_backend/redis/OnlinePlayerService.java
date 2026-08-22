@@ -7,9 +7,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.types.Expiration;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+
+import com.xadrez.chess_backend.record.PlayerDisconnectedEvent;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class OnlinePlayerService {
     private static final Long ONLINE_TTL_SECONDS = 180L;
 
     private final StringRedisTemplate redisTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
     public void setOnline(UUID playerId) {
         String key = ONLINE_PLAYERS_KEY + playerId.toString();
@@ -30,7 +34,9 @@ public class OnlinePlayerService {
     public void setOffline(UUID playerId) {
         String key = ONLINE_PLAYERS_KEY + playerId.toString();
 
-        redisTemplate.delete(key);
+        if (Boolean.TRUE.equals(redisTemplate.delete(key))) {
+            eventPublisher.publishEvent(new PlayerDisconnectedEvent(playerId));
+        }
     }
 
     public boolean isOnline(UUID playerId) {

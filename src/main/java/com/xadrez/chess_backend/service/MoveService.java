@@ -1,14 +1,16 @@
 package com.xadrez.chess_backend.service;
 
-import java.util.UUID;
 import java.util.List;
+import java.util.UUID;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.xadrez.chess_backend.dto.move.MakeMoveRequest;
 import com.xadrez.chess_backend.dto.move.MoveResponse;
 import com.xadrez.chess_backend.enums.GameResult;
+import com.xadrez.chess_backend.enums.GameStatus;
 import com.xadrez.chess_backend.enums.PieceColor;
 import com.xadrez.chess_backend.exception.GameNotFoundException;
 import com.xadrez.chess_backend.exception.InvalidMoveException;
@@ -19,6 +21,8 @@ import com.xadrez.chess_backend.model.Move;
 import com.xadrez.chess_backend.model.User;
 import com.xadrez.chess_backend.model.chess.King;
 import com.xadrez.chess_backend.model.chess.Piece;
+import com.xadrez.chess_backend.record.GameFinishedEvent;
+import com.xadrez.chess_backend.record.MoveMadeEvent;
 import com.xadrez.chess_backend.record.Position;
 import com.xadrez.chess_backend.repository.GameRepository;
 import com.xadrez.chess_backend.repository.MoveRepository;
@@ -35,6 +39,7 @@ public class MoveService {
     private final UserRepository userRepository;
     private final CheckService checkService;
     private final GameRestorationService gameRestorationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public MoveResponse makeMove(MakeMoveRequest request, UUID gameId) {
@@ -78,6 +83,10 @@ public class MoveService {
 
         Move savedMove = moveRepository.save(move);
         gameRepository.save(game);
+        eventPublisher.publishEvent(new MoveMadeEvent(game.getId(), savedMove.getId()));
+        if (game.getStatus() == GameStatus.FINISHED) {
+            eventPublisher.publishEvent(new GameFinishedEvent(game.getId(), game.getResult()));
+        }
         return new MoveResponse(savedMove, movingPiece.getType());
     }
 
