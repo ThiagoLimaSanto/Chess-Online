@@ -59,6 +59,8 @@ public class MatchMakingService {
 
         request.setWhitePlayer(whitePlayer);
         request.setBlackPlayer(blackPlayer);
+        request.setInitialTimeSeconds(600L);
+        request.setIncrementSeconds(0L);
 
         try {
             return gameService.createGame(request);

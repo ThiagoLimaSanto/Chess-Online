@@ -17,10 +17,11 @@ public class DefaultGameFactory implements GameFactory {
     }
 
     @Override
-    public Game createGame(User whitePlayer, User blackPlayer) {
+    public Game createGame(User whitePlayer, User blackPlayer, long initialTimeSeconds, long incrementSeconds) {
         Game game = new Game();
 
         game.setPlayers(whitePlayer, blackPlayer);
+        game.setTimeControl(initialTimeSeconds, incrementSeconds);
         game.setBoard(boardFactory.createInitialBoard());
         game.changeState(gameStateFactory.inProgress());
         

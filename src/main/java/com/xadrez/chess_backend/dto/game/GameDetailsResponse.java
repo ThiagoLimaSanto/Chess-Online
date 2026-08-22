@@ -21,6 +21,8 @@ public class GameDetailsResponse {
     private final GameResult result;
     private final LocalDateTime createdAt;
     private final LocalDateTime finishedAt;
+    private final long initialTimeSeconds;
+    private final long incrementSeconds;
     private final List<PiecePositionResponse> board;
     private final List<MoveHistoryResponse> moves;
 
@@ -33,6 +35,8 @@ public class GameDetailsResponse {
         this.result = game.getResult();
         this.createdAt = game.getCreatedAt();
         this.finishedAt = game.getFinishedAt();
+        this.initialTimeSeconds = game.getInitialTimeSeconds();
+        this.incrementSeconds = game.getIncrementSeconds();
         this.board = board;
         this.moves = moves;
     }

@@ -54,6 +54,10 @@ public class Game {
 
     private LocalDateTime finishedAt;
 
+    private long initialTimeSeconds;
+
+    private long incrementSeconds;
+
     @Transient
     private GameState state;
 
@@ -66,6 +70,11 @@ public class Game {
     public void setPlayers(User whitePlayer, User blackPlayer) {
         this.whitePlayer = whitePlayer;
         this.blackPlayer = blackPlayer;
+    }
+
+    public void setTimeControl(long initialTimeSeconds, long incrementSeconds) {
+        this.initialTimeSeconds = initialTimeSeconds;
+        this.incrementSeconds = incrementSeconds;
     }
 
     public void start() {

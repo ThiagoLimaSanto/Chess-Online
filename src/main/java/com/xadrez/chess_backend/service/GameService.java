@@ -54,7 +54,8 @@ public class GameService {
         User blackPlayer = userRepository.findById(request.getBlackPlayer())
                 .orElseThrow(() -> new UserNotFoundException("Player preto não encontrado"));
 
-        Game game = gameFactory.createGame(whitePlayer, blackPlayer);
+        Game game = gameFactory.createGame(whitePlayer, blackPlayer,
+                request.getInitialTimeSeconds(), request.getIncrementSeconds());
 
         Game savedGame = gameRepository.save(game);
 

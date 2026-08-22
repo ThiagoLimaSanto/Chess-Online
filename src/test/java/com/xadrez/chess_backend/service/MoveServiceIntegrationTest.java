@@ -47,7 +47,7 @@ class MoveServiceIntegrationTest {
     void persistsMovesAndRestoresTheBoardFromHistory() {
         User white = saveUser("white-player");
         User black = saveUser("black-player");
-        Game game = gameRepository.save(gameFactory.createGame(white, black));
+        Game game = gameRepository.save(gameFactory.createGame(white, black, 600, 0));
 
         MoveResponse whiteMove = moveService.makeMove(request(white, "e2", "e4"), game.getId());
         MoveResponse blackMove = moveService.makeMove(request(black, "e7", "e5"), game.getId());
@@ -66,7 +66,7 @@ class MoveServiceIntegrationTest {
     void finishesGameWithOpponentVictoryWhenAPlayerAbandons() {
         User white = saveUser("white-player");
         User black = saveUser("black-player");
-        Game game = gameRepository.save(gameFactory.createGame(white, black));
+        Game game = gameRepository.save(gameFactory.createGame(white, black, 600, 0));
 
         gameService.abandonGame(game.getId(), white.getId());
 
