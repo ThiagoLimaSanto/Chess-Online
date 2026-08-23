@@ -19,6 +19,7 @@ import com.xadrez.chess_backend.record.PlayerDisconnectedEvent;
 public class OnlinePlayerService {
 
     private static final String ONLINE_PLAYERS_KEY = "online:player:";
+    private static final String MATCH_MAKING_QUEUE_KEY = "matchmaking:queue";
     private static final Long ONLINE_TTL_SECONDS = 180L;
 
     private final StringRedisTemplate redisTemplate;
@@ -33,10 +34,16 @@ public class OnlinePlayerService {
 
     public void setOffline(UUID playerId) {
         String key = ONLINE_PLAYERS_KEY + playerId.toString();
+        redisTemplate.opsForSet().remove(MATCH_MAKING_QUEUE_KEY, playerId.toString());
 
         if (Boolean.TRUE.equals(redisTemplate.delete(key))) {
             eventPublisher.publishEvent(new PlayerDisconnectedEvent(playerId));
         }
+    }
+
+    public void expireOffline(UUID playerId) {
+        redisTemplate.opsForSet().remove(MATCH_MAKING_QUEUE_KEY, playerId.toString());
+        eventPublisher.publishEvent(new PlayerDisconnectedEvent(playerId));
     }
 
     public boolean isOnline(UUID playerId) {

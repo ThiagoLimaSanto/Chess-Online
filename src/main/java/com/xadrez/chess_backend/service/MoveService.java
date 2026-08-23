@@ -44,9 +44,14 @@ public class MoveService {
 
     @Transactional
     public MoveResponse makeMove(MakeMoveRequest request, UUID gameId) {
+        return makeMove(request, gameId, request.getPlayerId());
+    }
+
+    @Transactional
+    public MoveResponse makeMove(MakeMoveRequest request, UUID gameId, UUID authenticatedPlayerId) {
         Game game = gameRepository.findByIdForUpdate(gameId)
                 .orElseThrow(() -> new GameNotFoundException("Partida não encontrada"));
-        User player = userRepository.findById(request.getPlayerId())
+        User player = userRepository.findById(authenticatedPlayerId)
                 .orElseThrow(() -> new PlayerNotInGameException("Jogador não encontrado"));
 
         List<Move> moves = moveRepository.findByGameIdOrderByMoveNumberAsc(gameId);

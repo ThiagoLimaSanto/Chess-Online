@@ -1,18 +1,18 @@
 package com.xadrez.chess_backend.redis;
 
 import java.util.Set;
-import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.xadrez.chess_backend.dto.game.GameResponse;
 import com.xadrez.chess_backend.exception.GameNotFoundException;
+import com.xadrez.chess_backend.model.User;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,15 +23,15 @@ public class MatchMakingController {
     private final MatchMakingService matchMakingService;
 
     @PostMapping("/{id}/join-queue")
-    public ResponseEntity<Void> joinQueue(@PathVariable UUID id) {
-        matchMakingService.joinQueue(id);
+    public ResponseEntity<Void> joinQueue(@AuthenticationPrincipal User user) {
+        matchMakingService.joinQueue(user.getId());
 
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/isinqueue")
-    public ResponseEntity<Boolean> isInQueue(@PathVariable UUID id) {
-        return ResponseEntity.ok(matchMakingService.isInQueue(id));
+    public ResponseEntity<Boolean> isInQueue(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(matchMakingService.isInQueue(user.getId()));
     }
 
     @GetMapping("/queue")
@@ -40,8 +40,8 @@ public class MatchMakingController {
     }
 
     @DeleteMapping("/{id}/leave-queue")
-    public ResponseEntity<Void> leaveQueue(@PathVariable UUID id) {
-        matchMakingService.leaveQueue(id);
+    public ResponseEntity<Void> leaveQueue(@AuthenticationPrincipal User user) {
+        matchMakingService.leaveQueue(user.getId());
 
         return ResponseEntity.noContent().build();
     }

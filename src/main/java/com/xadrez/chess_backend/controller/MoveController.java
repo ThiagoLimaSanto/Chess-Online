@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.xadrez.chess_backend.dto.move.MakeMoveRequest;
 import com.xadrez.chess_backend.dto.move.MoveHistoryResponse;
 import com.xadrez.chess_backend.dto.move.MoveResponse;
+import com.xadrez.chess_backend.model.User;
 import com.xadrez.chess_backend.service.GameService;
 import com.xadrez.chess_backend.service.MoveService;
 
@@ -31,8 +33,10 @@ public class MoveController {
 
     @PostMapping("/{gameId}/moves")
     @ResponseStatus(HttpStatus.OK)
-    public MoveResponse makeMove(@Valid @RequestBody MakeMoveRequest request, @PathVariable UUID gameId) {
-        return moveService.makeMove(request, gameId);
+    public MoveResponse makeMove(@Valid @RequestBody MakeMoveRequest request,
+            @PathVariable UUID gameId,
+            @AuthenticationPrincipal User authenticatedUser) {
+        return moveService.makeMove(request, gameId, authenticatedUser.getId());
     }
 
     @GetMapping("/{gameId}/moves")
