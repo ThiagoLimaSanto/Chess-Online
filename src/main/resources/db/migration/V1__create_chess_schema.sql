@@ -8,6 +8,23 @@ CREATE TABLE users (
     CONSTRAINT uk_users_username UNIQUE (username)
 );
 
+CREATE TABLE friendships (
+    id BINARY(16) NOT NULL,
+    requester_id BINARY(16) NOT NULL,
+    receiver_id BINARY(16) NOT NULL,
+    status ENUM('PENDING', 'ACCEPTED', 'REJECTED') NOT NULL,
+    created_at DATETIME(6) NOT NULL,
+    CONSTRAINT pk_friendships PRIMARY KEY (id),
+    CONSTRAINT fk_friendships_requester
+        FOREIGN KEY (requester_id) REFERENCES users(id),
+    CONSTRAINT fk_friendships_receiver
+        FOREIGN KEY (receiver_id) REFERENCES users(id),
+    CONSTRAINT chk_friendships_different_users
+        CHECK (requester_id <> receiver_id),
+    CONSTRAINT uk_friendships
+        UNIQUE (requester_id, receiver_id)
+);
+
 CREATE TABLE games (
     id BINARY(16) NOT NULL,
     white_player_id BINARY(16) NOT NULL,
