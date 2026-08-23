@@ -45,6 +45,54 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(UnauthorizedFriendshipActionException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedFriendshipAction(
+            UnauthorizedFriendshipActionException e) {
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                "Unauthorized",
+                e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(FriendshipAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleFriendshipAlreadyExists(
+            FriendshipAlreadyExistsException e) {
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(IllegalRequestFriendship.class)
+    public ResponseEntity<ErrorResponse> handleIllegalRequestFriendship(
+            IllegalRequestFriendship e) {
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(FriendshipNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleFriendshipNotFound(
+            FriendshipNotFoundException e) {
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
     @ExceptionHandler(InvalidPasswordException.class)
     public ResponseEntity<ErrorResponse> handleInvalidPassword(
             InvalidPasswordException e) {

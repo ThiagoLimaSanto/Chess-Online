@@ -45,4 +45,20 @@ public class Friendship {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    public Friendship(User requester, User receiver) {
+        this.requester = requester;
+        this.receiver = receiver;
+        this.status = FriendshipStatus.PENDING;
+    }
+
+    public void accept(){
+        if(this.status != FriendshipStatus.PENDING) throw new IllegalStateException("Somente pedidos pendentes podem ser aceitos.");
+        this.status = FriendshipStatus.ACCEPTED;
+    }
+
+    public void reject(){
+        if(this.status != FriendshipStatus.PENDING) throw new IllegalStateException("Somente pedidos pendentes podem ser rejeitados.");
+        this.status = FriendshipStatus.REJECTED;
+    }
 }
