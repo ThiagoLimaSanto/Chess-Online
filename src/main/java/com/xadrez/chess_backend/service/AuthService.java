@@ -7,6 +7,7 @@ import com.xadrez.chess_backend.config.infra.JwtService;
 import com.xadrez.chess_backend.dto.auth.LoginRequest;
 import com.xadrez.chess_backend.dto.auth.LoginResponse;
 import com.xadrez.chess_backend.dto.auth.RegisterRequest;
+import com.xadrez.chess_backend.enums.Role;
 import com.xadrez.chess_backend.exception.InvalidPasswordException;
 import com.xadrez.chess_backend.exception.UserNotFoundException;
 import com.xadrez.chess_backend.exception.UsernameAlreadyExistException;
@@ -32,7 +33,7 @@ public class AuthService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash()))
             throw new InvalidPasswordException("Usuário ou senha incorretos");
 
-        String token = jwtService.generateToken(user.getId());
+        String token = jwtService.generateToken(user.getId(), user.getRole());
 
         onlinePlayerService.setOnline(user.getId());
 
@@ -48,6 +49,7 @@ public class AuthService {
 
         savedUser.setUsername(request.getUsername());
         savedUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        savedUser.setRole(Role.USER);
 
         userRepository.save(savedUser);
     }

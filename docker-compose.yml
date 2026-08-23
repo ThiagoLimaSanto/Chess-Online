@@ -41,6 +41,8 @@ services:
     container_name: chess-redis
     restart: unless-stopped
 
+    command: redis-server --notify-keyspace-events Ex
+
     ports:
       - "6379:6379"
 

@@ -8,6 +8,7 @@ import javax.crypto.SecretKey;
 
 import org.springframework.stereotype.Service;
 
+import com.xadrez.chess_backend.enums.Role;
 import com.xadrez.chess_backend.record.JwtProperties;
 
 import io.jsonwebtoken.Jwts;
@@ -25,7 +26,7 @@ public class JwtService {
                 jwtProperties.secret().getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(UUID userId) {
+    public String generateToken(UUID userId, Role role) {
 
         Date now = new Date();
 
@@ -34,6 +35,7 @@ public class JwtService {
 
         return Jwts.builder()
                 .subject(userId.toString())
+                .claim("role", role.name())
                 .issuedAt(now)
                 .expiration(expirationDate)
                 .signWith(secretKey)
@@ -50,6 +52,16 @@ public class JwtService {
                 .getSubject();
 
         return UUID.fromString(subject);
+    }
+
+    public Role extractRole(String token) {
+
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("role", Role.class);
     }
 
     public boolean isValid(String token) {

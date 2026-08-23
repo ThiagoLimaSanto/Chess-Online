@@ -2,6 +2,7 @@ CREATE TABLE users (
     id BINARY(16) NOT NULL,
     username VARCHAR(50) NOT NULL,
     password_hash VARCHAR(100) NOT NULL,
+    role ENUM('USER', 'ADMIN') NOT NULL DEFAULT 'USER',
     created_at DATETIME(6) NOT NULL,
     CONSTRAINT pk_users PRIMARY KEY (id),
     CONSTRAINT uk_users_username UNIQUE (username)
