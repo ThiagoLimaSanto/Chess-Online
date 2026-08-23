@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.xadrez.chess_backend.controller.FriendshipController;
 import com.xadrez.chess_backend.exception.FriendshipAlreadyExistsException;
 import com.xadrez.chess_backend.exception.FriendshipNotFoundException;
 import com.xadrez.chess_backend.exception.IllegalRequestFriendship;
@@ -50,7 +49,10 @@ public class FriendshipService {
         UUID userId = getUserId();
 
         Friendship friendship = friendshipRepository.findById(friendshipId)
-                .orElseThrow(() -> new FriendshipNotFoundException("Usuário não econtrado"));
+                .orElseThrow(() -> {
+                    System.out.println("Nao achou o usuario");
+                    throw new FriendshipNotFoundException("Solicitação de amizade não encontrada");
+                });
 
         if (!friendship.getReceiver().getId().equals(userId)) {
             throw new UnauthorizedFriendshipActionException("Ação não autorizada para esta amizade.");
@@ -64,7 +66,7 @@ public class FriendshipService {
         UUID userId = getUserId();
 
         Friendship friendship = friendshipRepository.findById(friendshipId)
-                .orElseThrow(() -> new FriendshipNotFoundException("Usuário não econtrado"));
+                .orElseThrow(() -> new FriendshipNotFoundException("Solicitação de amizade não encontrada"));
 
         if (!friendship.getReceiver().getId().equals(userId)) {
             throw new UnauthorizedFriendshipActionException("Ação não autorizada para esta amizade.");
