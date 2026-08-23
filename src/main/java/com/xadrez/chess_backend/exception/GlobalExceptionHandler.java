@@ -33,6 +33,30 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(UsernameAlreadyExistException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameAlreadyExist(
+            UsernameAlreadyExistException e) {
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPassword(
+            InvalidPasswordException e) {
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(PieceInvalidPromotion.class)
     public ResponseEntity<ErrorResponse> handlePieceInvalidPromotion(
             PieceInvalidPromotion exception) {

@@ -58,9 +58,9 @@ public class Game {
 
     private LocalDateTime finishedAt;
 
-    private long initialTimeSeconds;
+    private Long initialTimeSeconds;
 
-    private long incrementSeconds;
+    private Long incrementSeconds;
 
     @Transient
     private GameState state;

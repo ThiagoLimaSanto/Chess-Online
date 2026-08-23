@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,24 +21,24 @@ public class OnlinePlayerController {
 
     private final OnlinePlayerService onlinePlayerService;
 
-    @PostMapping("/{id}/online")
+    @PostMapping("/{id}/set-online")
     public ResponseEntity<Void> setOnline(@PathVariable UUID id) {
         onlinePlayerService.setOnline(id);
 
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/online")
+    @GetMapping("/{id}/isonline")
     public ResponseEntity<Boolean> isOnline(@PathVariable UUID id) {
         return ResponseEntity.ok(onlinePlayerService.isOnline(id));
     }
 
     @GetMapping
-    public ResponseEntity<Set<String>> getOnlinePlayers() {
+    public ResponseEntity<Set<String>> getOnlinePlayers(Authentication authentication) {
         return ResponseEntity.ok(onlinePlayerService.getOnlinePlayers());
     }
 
-    @DeleteMapping("/{id}/online")
+    @DeleteMapping("/{id}/set-offline")
     public ResponseEntity<Void> setOffline(@PathVariable UUID id) {
         onlinePlayerService.setOffline(id);
 

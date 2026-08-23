@@ -4,15 +4,26 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
+
   jpa:
     hibernate:
       ddl-auto: create-drop
+
   data:
     redis:
       host: localhost
       port: 6379
+
   flyway:
     enabled: false
+
+jwt:
+  secret: test-secret-key-12345678901234567890123456789012345678901234567890
+
+app:
+  cors:
+    allowed-origins:
+      - http://localhost:5173
 
 logging:
   level:
