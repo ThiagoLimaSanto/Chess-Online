@@ -1,5 +1,6 @@
 package com.xadrez.chess_backend.service;
 
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,12 +26,15 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final OnlinePlayerService onlinePlayerService;
+    private final UserDetailsService userDetailsService;
 
     public LoginResponse login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new UserNotFoundException("Usuário ou senha incorretos"));
+        User user = (User) userDetailsService.loadUserByUsername(request.getUsername());
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash()))
+        if (user == null)
+            throw new UserNotFoundException("Usuário ou senha incorretos");
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))
             throw new InvalidPasswordException("Usuário ou senha incorretos");
 
         String token = jwtService.generateToken(user.getId(), user.getRole());
