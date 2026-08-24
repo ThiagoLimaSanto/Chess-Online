@@ -1,0 +1,19 @@
+{
+  "properties": [
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "Secret used to sign and validate JWT tokens."
+    },
+    {
+      "name": "app.cors.allowed-origins",
+      "type": "java.lang.String[]",
+      "description": "Allowed HTTP CORS origins."
+    },
+    {
+      "name": "app.websocket.allowed-origins",
+      "type": "java.lang.String[]",
+      "description": "Allowed WebSocket origins."
+    }
+  ]
+}

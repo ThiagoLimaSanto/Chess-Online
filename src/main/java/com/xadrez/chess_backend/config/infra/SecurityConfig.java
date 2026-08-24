@@ -15,45 +15,45 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-                .csrf(csrf -> csrf.disable())
+                http
+                                .csrf(csrf -> csrf.disable())
 
-                .sessionManagement(session -> session.sessionCreationPolicy(
-                        SessionCreationPolicy.STATELESS))
+                                .sessionManagement(session -> session.sessionCreationPolicy(
+                                                SessionCreationPolicy.STATELESS))
 
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/auth/login",
-                                "/auth/register")
-                        .permitAll()
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers(
+                                                                "/auth/login",
+                                                                "/auth/register")
+                                                .permitAll()
 
-                        .requestMatchers("/ws", "/ws/**")
-                        .permitAll()
+                                                .requestMatchers("/ws", "/ws/**")
+                                                .permitAll()
 
-                        .requestMatchers("/admin/**")
-                        .hasRole("ADMIN")
+                                                .requestMatchers("/admin/**")
+                                                .hasRole("ADMIN")
 
-                        .requestMatchers(
-                                "/players/**",
-                                "/matchmaking/**")
-                        .hasRole("USER")
+                                                .requestMatchers(
+                                                                "/players/**",
+                                                                "/matchmaking/**")
+                                                .hasRole("USER")
 
-                        .anyRequest().authenticated())
+                                                .anyRequest().authenticated())
 
-                .addFilterBefore(
-                        jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class);
+                                .addFilterBefore(
+                                                jwtAuthenticationFilter,
+                                                UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 }
