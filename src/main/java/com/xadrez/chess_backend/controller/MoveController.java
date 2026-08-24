@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,20 +28,22 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/games")
 @RequiredArgsConstructor
 public class MoveController {
-    
+
     private final MoveService moveService;
     private final GameService gameService;
 
     @PostMapping("/{gameId}/moves")
     @ResponseStatus(HttpStatus.OK)
-    public MoveResponse makeMove(@Valid @RequestBody MakeMoveRequest request,
+    public ResponseEntity<MoveResponse> makeMove(@Valid @RequestBody MakeMoveRequest request,
             @PathVariable UUID gameId,
             @AuthenticationPrincipal User authenticatedUser) {
-        return moveService.makeMove(request, gameId, authenticatedUser.getId());
+        MoveResponse response = moveService.makeMove(request, gameId, authenticatedUser.getId());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{gameId}/moves")
-    public List<MoveHistoryResponse> getMoves(@PathVariable UUID gameId) {
-        return gameService.getMoveHistory(gameId);
+    public ResponseEntity<List<MoveHistoryResponse>> getMoves(@PathVariable UUID gameId) {
+        List<MoveHistoryResponse> response = gameService.getMoveHistory(gameId);
+        return ResponseEntity.ok(response);
     }
 }

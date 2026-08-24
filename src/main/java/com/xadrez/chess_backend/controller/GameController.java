@@ -3,6 +3,7 @@ package com.xadrez.chess_backend.controller;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,21 +27,24 @@ import lombok.RequiredArgsConstructor;
 public class GameController {
 
     private final GameService gameService;
-    
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public GameResponse createGame(@Valid @RequestBody CreateGameRequest request) {
-        return gameService.createGame(request);
+    public ResponseEntity<GameResponse> createGame(@Valid @RequestBody CreateGameRequest request) {
+        GameResponse response = gameService.createGame(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{gameId}")
-    public GameDetailsResponse getGame(@PathVariable UUID gameId) {
-        return gameService.getGameDetails(gameId);
+    public ResponseEntity<GameDetailsResponse> getGame(@PathVariable UUID gameId) {
+        GameDetailsResponse response = gameService.getGameDetails(gameId);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{gameId}/abandon")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void abandonGame(@PathVariable UUID gameId, @RequestParam UUID playerId) {
+    public ResponseEntity<Void> abandonGame(@PathVariable UUID gameId, @RequestParam UUID playerId) {
         gameService.abandonGame(gameId, playerId);
+        return ResponseEntity.noContent().build();
     }
 }
