@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.xadrez.chess_backend.model.User;
+import com.xadrez.chess_backend.redis.OnlinePlayerService;
 import com.xadrez.chess_backend.repository.UserRepository;
 
 import jakarta.servlet.FilterChain;
@@ -23,6 +24,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final OnlinePlayerService onlinePlayerService;
 
     @Override
     protected void doFilterInternal(
@@ -49,6 +51,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             UUID userId = jwtService.extractUserId(token);
+
+            if (!onlinePlayerService.isOnline(userId)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
             User user = userRepository.findById(userId)
                     .orElse(null);

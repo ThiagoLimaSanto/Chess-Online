@@ -22,9 +22,8 @@ public class FriendshipService {
 
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
-
     public void sendRequest(UUID receiverID) {
-        UUID requesterId = getUserId();
+        UUID requesterId = AuthenticationUtils.getAuthenticatedUserId();
 
         if (requesterId.equals(receiverID))
             throw new IllegalRequestFriendship("O usuário não pode pedir amizade com si mesmo.");
@@ -46,7 +45,7 @@ public class FriendshipService {
 
     public void accept(UUID friendshipId) {
 
-        UUID userId = getUserId();
+        UUID userId = AuthenticationUtils.getAuthenticatedUserId();
 
         Friendship friendship = friendshipRepository.findById(friendshipId)
                 .orElseThrow(() -> {
@@ -63,7 +62,7 @@ public class FriendshipService {
 
     public void reject(UUID friendshipId) {
 
-        UUID userId = getUserId();
+        UUID userId = AuthenticationUtils.getAuthenticatedUserId();
 
         Friendship friendship = friendshipRepository.findById(friendshipId)
                 .orElseThrow(() -> new FriendshipNotFoundException("Solicitação de amizade não encontrada"));
@@ -75,7 +74,4 @@ public class FriendshipService {
         friendshipRepository.save(friendship);
     }
 
-    private UUID getUserId() {
-        return AuthenticationUtils.authenticationUtils();
-    }
 }

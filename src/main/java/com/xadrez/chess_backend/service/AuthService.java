@@ -1,5 +1,7 @@
 package com.xadrez.chess_backend.service;
 
+import java.util.UUID;
+
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -8,6 +10,7 @@ import com.xadrez.chess_backend.config.infra.JwtService;
 import com.xadrez.chess_backend.dto.auth.LoginRequest;
 import com.xadrez.chess_backend.dto.auth.LoginResponse;
 import com.xadrez.chess_backend.dto.auth.RegisterRequest;
+import com.xadrez.chess_backend.dto.user.UserResponse;
 import com.xadrez.chess_backend.enums.Role;
 import com.xadrez.chess_backend.exception.InvalidPasswordException;
 import com.xadrez.chess_backend.exception.UserNotFoundException;
@@ -15,6 +18,7 @@ import com.xadrez.chess_backend.exception.UsernameAlreadyExistException;
 import com.xadrez.chess_backend.model.User;
 import com.xadrez.chess_backend.redis.OnlinePlayerService;
 import com.xadrez.chess_backend.repository.UserRepository;
+import com.xadrez.chess_backend.utils.AuthenticationUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +31,14 @@ public class AuthService {
     private final JwtService jwtService;
     private final OnlinePlayerService onlinePlayerService;
     private final UserDetailsService userDetailsService;
+
+    public UserResponse me() {
+        UUID userId = AuthenticationUtils.getAuthenticatedUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+
+        return new UserResponse(user);
+    }
 
     public LoginResponse login(LoginRequest request) {
         User user = (User) userDetailsService.loadUserByUsername(request.getUsername());
@@ -56,5 +68,10 @@ public class AuthService {
         savedUser.setRole(Role.USER);
 
         userRepository.save(savedUser);
+    }
+
+    public void logout() {
+        UUID userId = AuthenticationUtils.getAuthenticatedUserId();
+        onlinePlayerService.setOffline(userId);
     }
 }

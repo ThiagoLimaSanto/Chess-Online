@@ -12,7 +12,7 @@ public class AuthenticationUtils {
     private AuthenticationUtils() {
     }
 
-    public static UUID authenticationUtils() {
+    public static UUID getAuthenticatedUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         return user.getId();

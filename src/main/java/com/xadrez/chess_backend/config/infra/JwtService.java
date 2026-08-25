@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.xadrez.chess_backend.enums.Role;
 import com.xadrez.chess_backend.record.JwtProperties;
-
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
@@ -54,6 +53,16 @@ public class JwtService {
         return UUID.fromString(subject);
     }
 
+    public String extractUsername(String token) {
+
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+    }
+
     public Role extractRole(String token) {
 
         return Jwts.parser()
@@ -80,4 +89,5 @@ public class JwtService {
             return false;
         }
     }
+
 }
