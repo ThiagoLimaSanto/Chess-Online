@@ -1,7 +1,5 @@
 package com.xadrez.chess_backend.controller;
 
-import java.util.List;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -16,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.xadrez.chess_backend.dto.user.CreateUserRequest;
 import com.xadrez.chess_backend.dto.user.UserResponse;
+import com.xadrez.chess_backend.record.PageResponse;
 import com.xadrez.chess_backend.service.UserService;
 
 import jakarta.validation.Valid;
@@ -29,10 +28,10 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/players")
-    public ResponseEntity<List<UserResponse>> getUsers(
+    public ResponseEntity<PageResponse<UserResponse>> getUsers(
             @RequestParam(required = false) String username,
             @PageableDefault(page = 0, size = 5) Pageable pageable) {
-        List<UserResponse> users = userService.getUsers(username, pageable);
+        PageResponse<UserResponse> users = userService.getUsers(username, pageable);
         return ResponseEntity.ok(users);
     }
 

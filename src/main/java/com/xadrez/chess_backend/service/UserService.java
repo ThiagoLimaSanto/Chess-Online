@@ -1,7 +1,5 @@
 package com.xadrez.chess_backend.service;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.xadrez.chess_backend.dto.user.CreateUserRequest;
 import com.xadrez.chess_backend.dto.user.UserResponse;
 import com.xadrez.chess_backend.model.User;
+import com.xadrez.chess_backend.record.PageResponse;
 import com.xadrez.chess_backend.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -22,16 +21,30 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public List<UserResponse> getUsers(String username, Pageable pageable) {
+    public PageResponse<UserResponse> getUsers(
+            String username,
+            Pageable pageable) {
 
         Page<User> users;
 
-        if (username != null && !username.isBlank())
-            users = userRepository.findByUsernameContainingIgnoreCase(username, pageable);
-        else
+        if (username == null || username.isBlank()) {
             users = userRepository.findAll(pageable);
+        } else {
+            users = userRepository.findByUsernameContainingIgnoreCase(
+                    username,
+                    pageable);
+        }
 
-        return users.map(UserResponse::new).toList();
+        return new PageResponse<>(
+                users.getContent()
+                        .stream()
+                        .map(user -> new UserResponse(user))
+                        .toList(),
+
+                users.getTotalElements(),
+                users.getTotalPages(),
+                users.getSize(),
+                users.getNumber());
     }
 
     public UserResponse createUser(CreateUserRequest request) {
