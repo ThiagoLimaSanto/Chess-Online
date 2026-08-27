@@ -1,5 +1,7 @@
 package com.xadrez.chess_backend.service;
 
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,6 +12,7 @@ import com.xadrez.chess_backend.dto.user.UserResponse;
 import com.xadrez.chess_backend.model.User;
 import com.xadrez.chess_backend.record.PageResponse;
 import com.xadrez.chess_backend.repository.UserRepository;
+import com.xadrez.chess_backend.utils.AuthenticationUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
     private final PasswordEncoder passwordEncoder;
-
     private final UserRepository userRepository;
 
     public PageResponse<UserResponse> getUsers(
@@ -27,11 +29,14 @@ public class UserService {
 
         Page<User> users;
 
+        UUID userId = AuthenticationUtils.getAuthenticatedUserId();
+
         if (username == null || username.isBlank()) {
-            users = userRepository.findAll(pageable);
+            users = userRepository.findByIdNot(userId, pageable);
         } else {
-            users = userRepository.findByUsernameContainingIgnoreCase(
+            users = userRepository.findByUsernameContainingIgnoreCaseAndIdNot(
                     username,
+                    userId,
                     pageable);
         }
 

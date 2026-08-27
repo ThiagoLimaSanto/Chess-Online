@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.xadrez.chess_backend.dto.friendship.FriendshipResponse;
+import com.xadrez.chess_backend.enums.FriendshipStatus;
 import com.xadrez.chess_backend.exception.FriendshipAlreadyExistsException;
 import com.xadrez.chess_backend.exception.FriendshipNotFoundException;
 import com.xadrez.chess_backend.exception.IllegalRequestFriendship;
@@ -37,6 +38,35 @@ public class FriendshipService {
 
         if (friendships.isEmpty())
             throw new FriendshipNotFoundException("Nenhuma amizade encontrada.");
+
+        return new PageResponse<>(
+                friendships.getContent()
+                        .stream()
+                        .map(friendship -> new FriendshipResponse(friendship, userId))
+                        .toList(),
+
+                friendships.getTotalElements(),
+                friendships.getTotalPages(),
+                friendships.getSize(),
+                friendships.getNumber());
+    }
+
+    public PageResponse<FriendshipResponse> getFriendshipRequests(
+            String username,
+            Pageable pageable) {
+
+        UUID userId = AuthenticationUtils.getAuthenticatedUserId();
+
+        Page<Friendship> friendships = friendshipRepository.findReceivedRequests(
+                userId,
+                FriendshipStatus.PENDING,
+                username,
+                pageable);
+
+        if (friendships.isEmpty()) {
+            throw new FriendshipNotFoundException(
+                    "Nenhuma solicitação de amizade encontrada.");
+        }
 
         return new PageResponse<>(
                 friendships.getContent()

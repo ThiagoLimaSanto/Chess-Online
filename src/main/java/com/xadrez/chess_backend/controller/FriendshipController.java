@@ -26,10 +26,18 @@ public class FriendshipController {
     private final FriendshipService friendshipService;
 
     @GetMapping
-    public ResponseEntity<PageResponse<FriendshipResponse>> getFriendshipRequests(
+    public ResponseEntity<PageResponse<FriendshipResponse>> getFriends(
             @RequestParam(required = false) String username,
             @PageableDefault(page = 0, size = 5) Pageable pageable) {
         PageResponse<FriendshipResponse> friendships = friendshipService.getFriends(username, pageable);
+        return ResponseEntity.ok(friendships);
+    }
+
+    @GetMapping("/requests")
+    public ResponseEntity<PageResponse<FriendshipResponse>> getFriendshipRequests(
+            @RequestParam(required = false) String username,
+            @PageableDefault(page = 0, size = 5) Pageable pageable) {
+        PageResponse<FriendshipResponse> friendships = friendshipService.getFriendshipRequests(username, pageable);
         return ResponseEntity.ok(friendships);
     }
 
