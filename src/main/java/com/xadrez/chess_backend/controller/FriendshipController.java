@@ -41,21 +41,30 @@ public class FriendshipController {
         return ResponseEntity.ok(friendships);
     }
 
+    @GetMapping("/sent-requests")
+    public ResponseEntity<PageResponse<FriendshipResponse>> getPendingFriendshipRequests(
+            @RequestParam(required = false) String username,
+            @PageableDefault(page = 0, size = 5) Pageable pageable) {
+        PageResponse<FriendshipResponse> friendships = friendshipService.getSentFriendshipRequests(username,
+                pageable);
+        return ResponseEntity.ok(friendships);
+    }
+
     @PostMapping("/send-request/{receiverId}")
     public ResponseEntity<Void> sendRequest(@PathVariable UUID receiverId) {
         friendshipService.sendRequest(receiverId);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{friendshipId}/accept")
-    public ResponseEntity<Void> accept(@PathVariable UUID friendshipId) {
-        friendshipService.accept(friendshipId);
+    @PostMapping("/{requesterId}/accept")
+    public ResponseEntity<Void> accept(@PathVariable UUID requesterId) {
+        friendshipService.accept(requesterId);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{friendshipId}/reject")
-    public ResponseEntity<Void> reject(@PathVariable UUID friendshipId) {
-        friendshipService.reject(friendshipId);
+    @PostMapping("/{requesterId}/reject")
+    public ResponseEntity<Void> reject(@PathVariable UUID requesterId) {
+        friendshipService.reject(requesterId);
         return ResponseEntity.noContent().build();
     }
 

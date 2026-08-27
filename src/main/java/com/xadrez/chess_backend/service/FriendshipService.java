@@ -11,7 +11,6 @@ import com.xadrez.chess_backend.enums.FriendshipStatus;
 import com.xadrez.chess_backend.exception.FriendshipAlreadyExistsException;
 import com.xadrez.chess_backend.exception.FriendshipNotFoundException;
 import com.xadrez.chess_backend.exception.IllegalRequestFriendship;
-import com.xadrez.chess_backend.exception.UnauthorizedFriendshipActionException;
 import com.xadrez.chess_backend.model.Friendship;
 import com.xadrez.chess_backend.model.User;
 import com.xadrez.chess_backend.record.PageResponse;
@@ -80,6 +79,35 @@ public class FriendshipService {
                 friendships.getNumber());
     }
 
+    public PageResponse<FriendshipResponse> getSentFriendshipRequests(
+            String username,
+            Pageable pageable) {
+
+        UUID userId = AuthenticationUtils.getAuthenticatedUserId();
+
+        Page<Friendship> friendships = friendshipRepository.findSentRequests(
+                userId,
+                FriendshipStatus.PENDING,
+                username,
+                pageable);
+
+        if (friendships.isEmpty()) {
+            throw new FriendshipNotFoundException(
+                    "Nenhuma solicitação de amizade enviada encontrada.");
+        }
+
+        return new PageResponse<>(
+                friendships.getContent()
+                        .stream()
+                        .map(friendship -> new FriendshipResponse(friendship, userId))
+                        .toList(),
+
+                friendships.getTotalElements(),
+                friendships.getTotalPages(),
+                friendships.getSize(),
+                friendships.getNumber());
+    }
+
     public void sendRequest(UUID receiverId) {
         UUID requesterId = AuthenticationUtils.getAuthenticatedUserId();
 
@@ -101,34 +129,31 @@ public class FriendshipService {
         friendshipRepository.save(friendship);
     }
 
-    public void accept(UUID friendshipId) {
+    public void accept(UUID requesterId) {
 
-        UUID userId = AuthenticationUtils.getAuthenticatedUserId();
+        UUID receiverId = AuthenticationUtils.getAuthenticatedUserId();
 
-        Friendship friendship = friendshipRepository.findById(friendshipId)
-                .orElseThrow(() -> {
-                    System.out.println("Nao achou o usuario");
-                    throw new FriendshipNotFoundException("Solicitação de amizade não encontrada");
-                });
+        Friendship friendship = friendshipRepository
+                .findPendingFriendship(requesterId, receiverId)
+                .orElseThrow(() -> new FriendshipNotFoundException(
+                        "Solicitação de amizade não encontrada"));
 
-        if (!friendship.getReceiver().getId().equals(userId)) {
-            throw new UnauthorizedFriendshipActionException("Ação não autorizada para esta amizade.");
-        }
         friendship.accept();
+
         friendshipRepository.save(friendship);
     }
 
-    public void reject(UUID friendshipId) {
+    public void reject(UUID requesterId) {
 
-        UUID userId = AuthenticationUtils.getAuthenticatedUserId();
+        UUID receiverId = AuthenticationUtils.getAuthenticatedUserId();
 
-        Friendship friendship = friendshipRepository.findById(friendshipId)
-                .orElseThrow(() -> new FriendshipNotFoundException("Solicitação de amizade não encontrada"));
+        Friendship friendship = friendshipRepository
+                .findPendingFriendship(requesterId, receiverId)
+                .orElseThrow(() -> new FriendshipNotFoundException(
+                        "Solicitação de amizade não encontrada"));
 
-        if (!friendship.getReceiver().getId().equals(userId)) {
-            throw new UnauthorizedFriendshipActionException("Ação não autorizada para esta amizade.");
-        }
         friendship.reject();
+
         friendshipRepository.save(friendship);
     }
 

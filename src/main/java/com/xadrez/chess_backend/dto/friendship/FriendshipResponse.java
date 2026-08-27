@@ -18,7 +18,7 @@ public class FriendshipResponse {
 
     public FriendshipResponse(Friendship friendship, UUID userId) {
 
-        this.id = friendship.getId();
+        this.id = friendship.getRequester().getId();
 
         if (friendship.getRequester().getId().equals(userId)) {
             this.username = friendship.getReceiver().getUsername();
