@@ -2,14 +2,19 @@ package com.xadrez.chess_backend.service;
 
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.xadrez.chess_backend.dto.friendship.CreateFriendshipRequest;
+import com.xadrez.chess_backend.dto.friendship.FriendshipResponse;
 import com.xadrez.chess_backend.exception.FriendshipAlreadyExistsException;
 import com.xadrez.chess_backend.exception.FriendshipNotFoundException;
 import com.xadrez.chess_backend.exception.IllegalRequestFriendship;
 import com.xadrez.chess_backend.exception.UnauthorizedFriendshipActionException;
 import com.xadrez.chess_backend.model.Friendship;
 import com.xadrez.chess_backend.model.User;
+import com.xadrez.chess_backend.record.PageResponse;
 import com.xadrez.chess_backend.repository.FriendshipRepository;
 import com.xadrez.chess_backend.repository.UserRepository;
 import com.xadrez.chess_backend.utils.AuthenticationUtils;
@@ -22,19 +27,43 @@ public class FriendshipService {
 
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
-    public void sendRequest(UUID receiverID) {
+
+    public PageResponse<FriendshipResponse> getFriends(
+            String username,
+            Pageable pageable) {
+
+        UUID userId = AuthenticationUtils.getAuthenticatedUserId();
+
+        Page<Friendship> friendships = friendshipRepository.findFriends(userId, username, pageable);
+
+        if (friendships.isEmpty())
+            throw new FriendshipNotFoundException("Nenhuma amizade encontrada.");
+
+        return new PageResponse<>(
+                friendships.getContent()
+                        .stream()
+                        .map(friendship -> new FriendshipResponse(friendship, userId))
+                        .toList(),
+
+                friendships.getTotalElements(),
+                friendships.getTotalPages(),
+                friendships.getSize(),
+                friendships.getNumber());
+    }
+
+    public void sendRequest(CreateFriendshipRequest request) {
         UUID requesterId = AuthenticationUtils.getAuthenticatedUserId();
 
-        if (requesterId.equals(receiverID))
+        if (requesterId.equals(request.getReceiverId()))
             throw new IllegalRequestFriendship("O usuário não pode pedir amizade com si mesmo.");
 
         User requester = userRepository.findById(requesterId)
                 .orElseThrow(() -> new FriendshipNotFoundException("Usuário não encontrado."));
 
-        User receiver = userRepository.findById(receiverID)
+        User receiver = userRepository.findById(request.getReceiverId())
                 .orElseThrow(() -> new FriendshipNotFoundException("Usuário não encontrado."));
 
-        if (friendshipRepository.existsFriendshipBetween(requesterId, receiverID)) {
+        if (friendshipRepository.existsFriendshipBetween(requesterId, request.getReceiverId())) {
             throw new FriendshipAlreadyExistsException("Já existe uma solicitação de amizade");
         }
 
