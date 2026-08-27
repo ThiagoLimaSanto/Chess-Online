@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.xadrez.chess_backend.dto.friendship.CreateFriendshipRequest;
 import com.xadrez.chess_backend.dto.friendship.FriendshipResponse;
 import com.xadrez.chess_backend.record.PageResponse;
 import com.xadrez.chess_backend.service.FriendshipService;
@@ -35,8 +34,8 @@ public class FriendshipController {
     }
 
     @PostMapping("/send-request/{receiverId}")
-    public ResponseEntity<Void> sendRequest(@PathVariable CreateFriendshipRequest request) {
-        friendshipService.sendRequest(request);
+    public ResponseEntity<Void> sendRequest(@PathVariable UUID receiverId) {
+        friendshipService.sendRequest(receiverId);
         return ResponseEntity.noContent().build();
     }
 

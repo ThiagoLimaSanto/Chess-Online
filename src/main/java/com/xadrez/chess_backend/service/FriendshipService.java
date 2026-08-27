@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.xadrez.chess_backend.dto.friendship.CreateFriendshipRequest;
 import com.xadrez.chess_backend.dto.friendship.FriendshipResponse;
 import com.xadrez.chess_backend.exception.FriendshipAlreadyExistsException;
 import com.xadrez.chess_backend.exception.FriendshipNotFoundException;
@@ -51,19 +50,19 @@ public class FriendshipService {
                 friendships.getNumber());
     }
 
-    public void sendRequest(CreateFriendshipRequest request) {
+    public void sendRequest(UUID receiverId) {
         UUID requesterId = AuthenticationUtils.getAuthenticatedUserId();
 
-        if (requesterId.equals(request.getReceiverId()))
+        if (requesterId.equals(receiverId))
             throw new IllegalRequestFriendship("O usuário não pode pedir amizade com si mesmo.");
 
         User requester = userRepository.findById(requesterId)
                 .orElseThrow(() -> new FriendshipNotFoundException("Usuário não encontrado."));
 
-        User receiver = userRepository.findById(request.getReceiverId())
+        User receiver = userRepository.findById(receiverId)
                 .orElseThrow(() -> new FriendshipNotFoundException("Usuário não encontrado."));
 
-        if (friendshipRepository.existsFriendshipBetween(requesterId, request.getReceiverId())) {
+        if (friendshipRepository.existsFriendshipBetween(requesterId, receiverId)) {
             throw new FriendshipAlreadyExistsException("Já existe uma solicitação de amizade");
         }
 
