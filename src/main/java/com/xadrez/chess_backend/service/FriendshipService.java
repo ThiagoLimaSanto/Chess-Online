@@ -35,9 +35,6 @@ public class FriendshipService {
 
         Page<Friendship> friendships = friendshipRepository.findFriends(userId, username, pageable);
 
-        if (friendships.isEmpty())
-            throw new FriendshipNotFoundException("Nenhuma amizade encontrada.");
-
         return new PageResponse<>(
                 friendships.getContent()
                         .stream()
@@ -62,11 +59,6 @@ public class FriendshipService {
                 username,
                 pageable);
 
-        if (friendships.isEmpty()) {
-            throw new FriendshipNotFoundException(
-                    "Nenhuma solicitação de amizade encontrada.");
-        }
-
         return new PageResponse<>(
                 friendships.getContent()
                         .stream()
@@ -90,11 +82,6 @@ public class FriendshipService {
                 FriendshipStatus.PENDING,
                 username,
                 pageable);
-
-        if (friendships.isEmpty()) {
-            throw new FriendshipNotFoundException(
-                    "Nenhuma solicitação de amizade enviada encontrada.");
-        }
 
         return new PageResponse<>(
                 friendships.getContent()
