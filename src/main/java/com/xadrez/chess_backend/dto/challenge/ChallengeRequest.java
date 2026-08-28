@@ -12,9 +12,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ChallengeRequest {
 
-    @NotBlank(message = "Nome do usuário não pode ser vazio")
-    private String challengerUsername;
-
     @NotBlank(message = "Nome do oponente não pode ser vazio")
     private String challengedUsername;
 

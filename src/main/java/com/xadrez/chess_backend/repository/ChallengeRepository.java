@@ -11,12 +11,12 @@ import com.xadrez.chess_backend.model.Challenge;
 
 public interface ChallengeRepository extends JpaRepository<Challenge, UUID> {
 
-    Page<Challenge> findByChallengedIdAndStatus(
+    Page<Challenge> findByChallengedUsername_IdAndStatus(
             UUID challengedId,
             ChallengeStatus status,
             Pageable pageable);
 
-    Page<Challenge> findByChallengerIdAndStatus(
+    Page<Challenge> findByChallengerUsername_IdAndStatus(
             UUID challengerId,
             ChallengeStatus status,
             Pageable pageable);

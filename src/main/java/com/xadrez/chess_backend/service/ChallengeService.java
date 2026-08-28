@@ -30,7 +30,8 @@ public class ChallengeService {
 
     public PageResponse<ChallengeResponse> getReceivedChallenge(ChallengeStatus status, Pageable pageable) {
         UUID userId = AuthenticationUtils.getAuthenticatedUserId();
-        Page<ChallengeResponse> challenges = challengeRepository.findByChallengedIdAndStatus(userId, status, pageable)
+        Page<ChallengeResponse> challenges = challengeRepository
+                .findByChallengedUsername_IdAndStatus(userId, status, pageable)
                 .map(ChallengeResponse::new);
 
         return new PageResponse<>(
@@ -43,7 +44,8 @@ public class ChallengeService {
 
     public PageResponse<ChallengeResponse> getSentChallenge(ChallengeStatus status, Pageable pageable) {
         UUID userId = AuthenticationUtils.getAuthenticatedUserId();
-        Page<ChallengeResponse> challenges = challengeRepository.findByChallengerIdAndStatus(userId, status, pageable)
+        Page<ChallengeResponse> challenges = challengeRepository
+                .findByChallengerUsername_IdAndStatus(userId, status, pageable)
                 .map(ChallengeResponse::new);
 
         return new PageResponse<>(
@@ -55,11 +57,13 @@ public class ChallengeService {
     }
 
     public void createChallenge(ChallengeRequest request) {
-        User challenger = userRepository.findByUsername(request.getChallengerUsername())
-                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+        UUID challengerId = AuthenticationUtils.getAuthenticatedUserId();
+
+        User challenger = userRepository.findById(challengerId)
+                .orElseThrow(() -> new UserNotFoundException("Usuário desafiante não encontrado"));
 
         User challenged = userRepository.findByUsername(request.getChallengedUsername())
-                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new UserNotFoundException("Usuário desafiado não encontrado"));
 
         Challenge challenge = new Challenge();
         challenge.setChallengerUsername(challenger);
