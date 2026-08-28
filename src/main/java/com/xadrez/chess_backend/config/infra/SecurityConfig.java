@@ -49,7 +49,8 @@ public class SecurityConfig {
 
                                                 .requestMatchers(
                                                                 "/players/**",
-                                                                "/matchmaking/**")
+                                                                "/matchmaking/**",
+                                                                "/challenges/**")
                                                 .hasRole("USER")
 
                                                 .anyRequest().authenticated())

@@ -28,7 +28,7 @@ public class ChallengeController {
 
     private final ChallengeService challengeService;
 
-    @GetMapping("/received/{status}")
+    @GetMapping("/received")
     public ResponseEntity<PageResponse<ChallengeResponse>> getReceivedChallenge(
             @RequestParam ChallengeStatus status,
             Pageable pageable) {
@@ -36,7 +36,7 @@ public class ChallengeController {
         return ResponseEntity.ok(response);
     };
 
-    @GetMapping("/sent/{status}")
+    @GetMapping("/sent")
     public ResponseEntity<PageResponse<ChallengeResponse>> getSentChallenge(
             @RequestParam ChallengeStatus status,
             Pageable pageable) {
