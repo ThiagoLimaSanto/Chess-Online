@@ -33,6 +33,30 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(ChallengeNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleChallengeNotFound(
+            ChallengeNotFoundException e) {
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(IllegalRequestChallenge.class)
+    public ResponseEntity<ErrorResponse> handleIllegalRequestChallenge(
+            IllegalRequestChallenge e) {
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(UsernameAlreadyExistException.class)
     public ResponseEntity<ErrorResponse> handleUsernameAlreadyExist(
             UsernameAlreadyExistException e) {
