@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.xadrez.chess_backend.config.infra.JwtService;
 import com.xadrez.chess_backend.dto.auth.LoginRequest;
@@ -31,6 +32,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final OnlinePlayerService onlinePlayerService;
     private final UserDetailsService userDetailsService;
+    private final PerformanceService performanceService;
 
     public UserResponse me() {
         UUID userId = AuthenticationUtils.getAuthenticatedUserId();
@@ -56,6 +58,7 @@ public class AuthService {
         return new LoginResponse(token);
     }
 
+    @Transactional
     public void register(RegisterRequest request) {
 
         if (userRepository.findByUsername(request.getUsername()).isPresent())
@@ -68,6 +71,8 @@ public class AuthService {
         savedUser.setRole(Role.USER);
 
         userRepository.save(savedUser);
+
+        performanceService.createInitialPerformance(savedUser);
     }
 
     public void logout() {

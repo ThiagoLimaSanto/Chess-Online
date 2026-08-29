@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -117,14 +118,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
-    @ExceptionHandler(InvalidPasswordException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidPassword(
-            InvalidPasswordException e) {
+    @ExceptionHandler({ InvalidPasswordException.class, UsernameNotFoundException.class })
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials(
+            RuntimeException e) {
 
         ErrorResponse response = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Bad Request",
-                e.getMessage());
+                "Usuário ou senha incorretos");
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
