@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 
 import com.xadrez.chess_backend.enums.PieceColor;
+import com.xadrez.chess_backend.factory.BoardFactory;
 import com.xadrez.chess_backend.model.chess.Bishop;
 import com.xadrez.chess_backend.model.chess.Board;
 import com.xadrez.chess_backend.model.chess.King;
@@ -84,6 +85,24 @@ class CheckServiceTest {
         assertEquals(
                 List.of(new Position(2, 4), new Position(3, 4)),
                 checkService.legalMovesFor(board, PieceColor.WHITE, List.of(), from));
+    }
+
+    @Test
+    void allowsEveryPawnIncludingEdgePawnsToAdvanceTwoSquares() {
+        Board board = new BoardFactory().createInitialBoard();
+
+        for (int column = 0; column < 8; column++) {
+            assertTrue(
+                    checkService.legalMovesFor(
+                            board, PieceColor.WHITE, List.of(), new Position(1, column))
+                            .contains(new Position(3, column)),
+                    "O peão branco da coluna " + column + " deve poder avançar duas casas");
+            assertTrue(
+                    checkService.legalMovesFor(
+                            board, PieceColor.BLACK, List.of(), new Position(6, column))
+                            .contains(new Position(4, column)),
+                    "O peão preto da coluna " + column + " deve poder avançar duas casas");
+        }
     }
 
     private void assertCheck(com.xadrez.chess_backend.model.chess.Piece attackingPiece, Position attackerPosition) {
