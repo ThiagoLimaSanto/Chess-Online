@@ -21,7 +21,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             GameAlreadyStartedException.class,
-            GameAlreadyFinishedException.class
+            GameAlreadyFinishedException.class,
+            PlayerAlreadyInGameException.class
     })
     public ResponseEntity<ErrorResponse> handleGameStateConflict(
             RuntimeException e) {

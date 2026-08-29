@@ -91,7 +91,10 @@ public class MatchMakingService {
         try {
             return gameService.createGame(request);
         } catch (RuntimeException exception) {
-            redisTemplate.opsForSet().add(MATCH_MAKING_QUEUE_KEY, whitePlayer.toString(), blackPlayer.toString());
+            availablePlayers.stream()
+                    .filter(playerId -> gameService.getCurrentGame(playerId).isEmpty())
+                    .forEach(playerId -> redisTemplate.opsForSet()
+                            .add(MATCH_MAKING_QUEUE_KEY, playerId.toString()));
             throw exception;
         }
     }

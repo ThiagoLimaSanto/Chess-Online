@@ -21,6 +21,7 @@ import com.xadrez.chess_backend.enums.GameResult;
 import com.xadrez.chess_backend.enums.GameStatus;
 import com.xadrez.chess_backend.exception.GameNotFoundException;
 import com.xadrez.chess_backend.exception.InvalidMoveException;
+import com.xadrez.chess_backend.exception.PlayerAlreadyInGameException;
 import com.xadrez.chess_backend.exception.UserNotFoundException;
 import com.xadrez.chess_backend.factory.GameFactory;
 import com.xadrez.chess_backend.model.Game;
@@ -53,11 +54,20 @@ public class GameService {
             throw new InvalidMoveException("Os jogadores da partida devem ser diferentes");
         }
 
-        User whitePlayer = userRepository.findById(request.getWhitePlayer())
-                .orElseThrow(() -> new UserNotFoundException("Player branco não encontrado"));
+        UUID firstPlayerId = request.getWhitePlayer().compareTo(request.getBlackPlayer()) < 0
+                ? request.getWhitePlayer()
+                : request.getBlackPlayer();
+        UUID secondPlayerId = firstPlayerId.equals(request.getWhitePlayer())
+                ? request.getBlackPlayer()
+                : request.getWhitePlayer();
 
-        User blackPlayer = userRepository.findById(request.getBlackPlayer())
-                .orElseThrow(() -> new UserNotFoundException("Player preto não encontrado"));
+        User firstPlayer = findPlayerForUpdate(firstPlayerId);
+        User secondPlayer = findPlayerForUpdate(secondPlayerId);
+        User whitePlayer = firstPlayer.getId().equals(request.getWhitePlayer()) ? firstPlayer : secondPlayer;
+        User blackPlayer = firstPlayer.getId().equals(request.getBlackPlayer()) ? firstPlayer : secondPlayer;
+
+        ensurePlayerIsAvailable(whitePlayer);
+        ensurePlayerIsAvailable(blackPlayer);
 
         Game game = gameFactory.createGame(whitePlayer, blackPlayer,
                 request.getInitialTimeSeconds(), request.getIncrementSeconds());
@@ -148,6 +158,18 @@ public class GameService {
     private Game findGame(UUID gameId) {
         return gameRepository.findById(gameId)
                 .orElseThrow(() -> new GameNotFoundException("Partida não encontrada"));
+    }
+
+    private User findPlayerForUpdate(UUID playerId) {
+        return userRepository.findByIdForUpdate(playerId)
+                .orElseThrow(() -> new UserNotFoundException("Jogador não encontrado"));
+    }
+
+    private void ensurePlayerIsAvailable(User player) {
+        if (!gameRepository.findByStatusAndPlayerId(GameStatus.IN_PROGRESS, player.getId()).isEmpty()) {
+            throw new PlayerAlreadyInGameException(
+                    "O jogador " + player.getUsername() + " já está em uma partida em andamento.");
+        }
     }
 
     private List<MoveHistoryResponse> toMoveHistory(List<Move> moves) {
