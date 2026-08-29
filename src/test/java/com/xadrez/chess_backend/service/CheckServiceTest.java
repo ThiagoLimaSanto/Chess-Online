@@ -1,7 +1,10 @@
 package com.xadrez.chess_backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
 
 import com.xadrez.chess_backend.enums.PieceColor;
 import com.xadrez.chess_backend.model.chess.Bishop;
@@ -68,6 +71,19 @@ class CheckServiceTest {
 
         assertTrue(checkService.isCheck(board, PieceColor.BLACK));
         assertFalse(checkService.isCheckMate(board, PieceColor.BLACK));
+    }
+
+    @Test
+    void allowsPawnToAdvanceTwoSquaresFromItsInitialPosition() {
+        Board board = new Board();
+        Position from = new Position(1, 4);
+        board.setPiece(new Position(0, 4), new King(PieceColor.WHITE));
+        board.setPiece(new Position(7, 4), new King(PieceColor.BLACK));
+        board.setPiece(from, new Pawn(PieceColor.WHITE));
+
+        assertEquals(
+                List.of(new Position(2, 4), new Position(3, 4)),
+                checkService.legalMovesFor(board, PieceColor.WHITE, List.of(), from));
     }
 
     private void assertCheck(com.xadrez.chess_backend.model.chess.Piece attackingPiece, Position attackerPosition) {

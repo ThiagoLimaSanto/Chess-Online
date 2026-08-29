@@ -1,6 +1,7 @@
 package com.xadrez.chess_backend.service;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -39,6 +40,7 @@ public class MoveService {
     private final UserRepository userRepository;
     private final CheckService checkService;
     private final DrawService drawService;
+    private final SpecialMoveService specialMoveService;
     private final GameRestorationService gameRestorationService;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -101,6 +103,45 @@ public class MoveService {
         return new MoveResponse(savedMove, movingPiece.getType());
     }
 
+    @Transactional(readOnly = true)
+    public List<String> getLegalMoves(UUID gameId, String fromSquare, UUID authenticatedPlayerId) {
+        if (fromSquare == null || !fromSquare.matches("^[a-h][1-8]$")) {
+            throw new InvalidMoveException("A casa deve estar no formato válido, como e2");
+        }
+
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new GameNotFoundException("Partida não encontrada"));
+        User player = userRepository.findById(authenticatedPlayerId)
+                .orElseThrow(() -> new PlayerNotInGameException("Jogador não encontrado"));
+        List<Move> moves = moveRepository.findByGameIdOrderByMoveNumberAsc(gameId);
+        gameRestorationService.restore(game, moves);
+
+        PieceColor playerColor = colorFor(game, player);
+        Position from = toPosition(fromSquare);
+        Piece piece = game.getBoard().getPiece(from);
+
+        if (piece == null) {
+            throw new InvalidMoveException("Não há peça na casa selecionada");
+        }
+        if (piece.getColor() != playerColor) {
+            throw new InvalidMoveException("A peça escolhida não pertence ao jogador");
+        }
+
+        List<Position> legalMoves = new ArrayList<>(
+                checkService.legalMovesFor(game.getBoard(), playerColor, moves, from));
+
+        if (piece instanceof King) {
+            for (int targetColumn : List.of(2, 6)) {
+                Position target = new Position(from.row(), targetColumn);
+                if (specialMoveService.canCastle(game.getBoard(), playerColor, from, target)) {
+                    legalMoves.add(target);
+                }
+            }
+        }
+
+        return legalMoves.stream().map(this::toChessSquare).toList();
+    }
+
     private PieceColor colorFor(Game game, User player) {
         if (game.getWhitePlayer().getId().equals(player.getId())) {
             return PieceColor.WHITE;
@@ -120,6 +161,10 @@ public class MoveService {
 
     private Position toPosition(String square) {
         return new Position(square.charAt(1) - '1', square.charAt(0) - 'a');
+    }
+
+    private String toChessSquare(Position position) {
+        return String.valueOf((char) ('a' + position.column())) + (position.row() + 1);
     }
 
     private PieceColor opposite(PieceColor color) {

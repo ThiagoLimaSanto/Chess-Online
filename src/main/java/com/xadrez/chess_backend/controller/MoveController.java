@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.xadrez.chess_backend.dto.move.MakeMoveRequest;
@@ -45,5 +46,13 @@ public class MoveController {
     public ResponseEntity<List<MoveHistoryResponse>> getMoves(@PathVariable UUID gameId) {
         List<MoveHistoryResponse> response = gameService.getMoveHistory(gameId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{gameId}/legal-moves")
+    public ResponseEntity<List<String>> getLegalMoves(
+            @PathVariable UUID gameId,
+            @RequestParam String from,
+            @AuthenticationPrincipal User authenticatedUser) {
+        return ResponseEntity.ok(moveService.getLegalMoves(gameId, from, authenticatedUser.getId()));
     }
 }

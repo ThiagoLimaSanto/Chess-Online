@@ -1,6 +1,7 @@
 package com.xadrez.chess_backend.service;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import org.springframework.stereotype.Service;
 
@@ -79,43 +80,47 @@ public class CheckService {
                 continue;
             }
 
-            MoveStrategy strategy = moveStrategyFactory.getStrategy(
-                    piece.getType());
-
-            for (int row = 0; row < 8; row++) {
-
-                for (int column = 0; column < 8; column++) {
-
-                    Position to = new Position(row, column);
-
-                    boolean enPassant = isEnPassantMove(board, moves, piece, from, to);
-                    if (!enPassant && !strategy.isValidMove(board, from, to)) {
-                        continue;
-                    }
-
-                    if (board.isFriendly(to, color)) {
-                        continue;
-                    }
-
-                    if (board.getPiece(to) instanceof King) {
-                        continue;
-                    }
-
-                    Board simulatedBoard = board.copy();
-
-                    simulatedBoard.movePiece(from, to);
-                    if (enPassant) {
-                        simulatedBoard.removePiece(new Position(from.row(), to.column()));
-                    }
-
-                    if (!isCheck(simulatedBoard, color)) {
-                        return true;
-                    }
-                }
+            if (!legalMovesFor(board, color, moves, from).isEmpty()) {
+                return true;
             }
         }
 
         return false;
+    }
+
+    public List<Position> legalMovesFor(Board board, PieceColor color, List<Move> moves, Position from) {
+        Piece piece = board.getPiece(from);
+        if (piece == null || piece.getColor() != color) {
+            return List.of();
+        }
+
+        MoveStrategy strategy = moveStrategyFactory.getStrategy(piece.getType());
+        List<Position> legalMoves = new ArrayList<>();
+
+        for (int row = 0; row < 8; row++) {
+            for (int column = 0; column < 8; column++) {
+                Position to = new Position(row, column);
+                boolean enPassant = isEnPassantMove(board, moves, piece, from, to);
+
+                if ((!enPassant && !strategy.isValidMove(board, from, to))
+                        || board.isFriendly(to, color)
+                        || board.getPiece(to) instanceof King) {
+                    continue;
+                }
+
+                Board simulatedBoard = board.copy();
+                simulatedBoard.movePiece(from, to);
+                if (enPassant) {
+                    simulatedBoard.removePiece(new Position(from.row(), to.column()));
+                }
+
+                if (!isCheck(simulatedBoard, color)) {
+                    legalMoves.add(to);
+                }
+            }
+        }
+
+        return legalMoves;
     }
 
     private boolean isEnPassantMove(Board board, List<Move> moves, Piece piece,

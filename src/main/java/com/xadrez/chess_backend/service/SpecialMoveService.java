@@ -65,6 +65,16 @@ public class SpecialMoveService {
         board.movePiece(rookFrom, rookTo);
     }
 
+    public boolean canCastle(Board board, PieceColor color, Position from, Position to) {
+        try {
+            Board simulatedBoard = board.copy();
+            castle(simulatedBoard, color, from, to);
+            return !checkService.isCheck(simulatedBoard, color);
+        } catch (InvalidMoveException exception) {
+            return false;
+        }
+    }
+
     public boolean isEnPassantMove(Game game, Piece piece, Position from, Position to) {
         if (!(piece instanceof Pawn) || !game.getBoard().isEmpty(to)) {
             return false;
