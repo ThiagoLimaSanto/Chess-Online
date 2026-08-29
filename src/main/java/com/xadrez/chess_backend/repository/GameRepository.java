@@ -25,9 +25,16 @@ public interface GameRepository extends JpaRepository<Game, UUID> {
         @Lock(LockModeType.PESSIMISTIC_WRITE)
         @Query("select game from Game game where game.status = :status and "
                         + "(game.whitePlayer.id = :playerId or game.blackPlayer.id = :playerId)")
-        List<Game> findByStatusAndPlayerIdForUpdate(
+    List<Game> findByStatusAndPlayerIdForUpdate(
                         @Param("status") GameStatus status,
-                        @Param("playerId") UUID playerId);
+            @Param("playerId") UUID playerId);
+
+    @Query("select game from Game game where game.status = :status and "
+            + "(game.whitePlayer.id = :playerId or game.blackPlayer.id = :playerId) "
+            + "order by game.createdAt desc")
+    List<Game> findByStatusAndPlayerId(
+            @Param("status") GameStatus status,
+            @Param("playerId") UUID playerId);
 
         Page<Game> findByStatusAndWhitePlayerIdOrStatusAndBlackPlayerIdOrderByFinishedAtDesc(
                         GameStatus whiteStatus,

@@ -3,6 +3,7 @@ package com.xadrez.chess_backend.redis;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Optional;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,10 @@ public class MatchMakingService {
         Set<String> players = redisTemplate.opsForSet().members(MATCH_MAKING_QUEUE_KEY);
 
         return players != null ? players : Set.of();
+    }
+
+    public Optional<GameResponse> getCurrentGame(UUID playerId) {
+        return gameService.getCurrentGame(playerId);
     }
 
     public GameResponse findMatch() {

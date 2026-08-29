@@ -16,7 +16,9 @@ public class GameDetailsResponse {
 
     private final UUID id;
     private final UUID whitePlayer;
+    private final String whitePlayerUsername;
     private final UUID blackPlayer;
+    private final String blackPlayerUsername;
     private final GameStatus status;
     private final GameResult result;
     private final LocalDateTime createdAt;
@@ -30,7 +32,9 @@ public class GameDetailsResponse {
             List<MoveHistoryResponse> moves) {
         this.id = game.getId();
         this.whitePlayer = game.getWhitePlayer().getId();
+        this.whitePlayerUsername = game.getWhitePlayer().getUsername();
         this.blackPlayer = game.getBlackPlayer().getId();
+        this.blackPlayerUsername = game.getBlackPlayer().getUsername();
         this.status = game.getStatus();
         this.result = game.getResult();
         this.createdAt = game.getCreatedAt();

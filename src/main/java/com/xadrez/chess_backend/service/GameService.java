@@ -2,6 +2,7 @@ package com.xadrez.chess_backend.service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -89,6 +90,14 @@ public class GameService {
     public List<MoveHistoryResponse> getMoveHistory(UUID gameId) {
         findGame(gameId);
         return toMoveHistory(moveRepository.findByGameIdOrderByMoveNumberAsc(gameId));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<GameResponse> getCurrentGame(UUID playerId) {
+        return gameRepository.findByStatusAndPlayerId(GameStatus.IN_PROGRESS, playerId)
+                .stream()
+                .findFirst()
+                .map(GameResponse::new);
     }
 
     @Transactional

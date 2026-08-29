@@ -23,10 +23,41 @@ public class MatchMakingController {
     private final MatchMakingService matchMakingService;
 
     @PostMapping("/{id}/join-queue")
-    public ResponseEntity<Void> joinQueue(@AuthenticationPrincipal User user) {
-        matchMakingService.joinQueue(user.getId());
+    public ResponseEntity<GameResponse> joinQueue(@AuthenticationPrincipal User user) {
+        var currentGame = matchMakingService.getCurrentGame(user.getId());
+        if (currentGame.isPresent()) {
+            return ResponseEntity.ok(currentGame.get());
+        }
 
-        return ResponseEntity.noContent().build();
+        matchMakingService.joinQueue(user.getId());
+        matchMakingService.findMatch();
+
+        return matchMakingService.getCurrentGame(user.getId())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.accepted().build());
+    }
+
+    @GetMapping("/current-game")
+    public ResponseEntity<GameResponse> getCurrentGame(@AuthenticationPrincipal User user) {
+        return matchMakingService.getCurrentGame(user.getId())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    @PostMapping("/find-current-game")
+    public ResponseEntity<GameResponse> findCurrentGame(@AuthenticationPrincipal User user) {
+        var currentGame = matchMakingService.getCurrentGame(user.getId());
+        if (currentGame.isPresent()) {
+            return ResponseEntity.ok(currentGame.get());
+        }
+
+        if (matchMakingService.isInQueue(user.getId())) {
+            matchMakingService.findMatch();
+        }
+
+        return matchMakingService.getCurrentGame(user.getId())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @GetMapping("/{id}/isinqueue")
