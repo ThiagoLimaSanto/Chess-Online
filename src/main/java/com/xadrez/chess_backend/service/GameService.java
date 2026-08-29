@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,19 +14,21 @@ import com.xadrez.chess_backend.dto.game.CreateGameRequest;
 import com.xadrez.chess_backend.dto.game.GameDetailsResponse;
 import com.xadrez.chess_backend.dto.game.GameResponse;
 import com.xadrez.chess_backend.dto.game.PiecePositionResponse;
+import com.xadrez.chess_backend.dto.history.PlayerGameHistoryResponse;
 import com.xadrez.chess_backend.dto.move.MoveHistoryResponse;
 import com.xadrez.chess_backend.enums.GameResult;
 import com.xadrez.chess_backend.enums.GameStatus;
 import com.xadrez.chess_backend.exception.GameNotFoundException;
+import com.xadrez.chess_backend.exception.InvalidMoveException;
 import com.xadrez.chess_backend.exception.UserNotFoundException;
 import com.xadrez.chess_backend.factory.GameFactory;
-import com.xadrez.chess_backend.exception.InvalidMoveException;
 import com.xadrez.chess_backend.model.Game;
 import com.xadrez.chess_backend.model.Move;
 import com.xadrez.chess_backend.model.User;
-import com.xadrez.chess_backend.record.GameCreatedEvent;
 import com.xadrez.chess_backend.record.GameAbandonedEvent;
+import com.xadrez.chess_backend.record.GameCreatedEvent;
 import com.xadrez.chess_backend.record.GameFinishedEvent;
+import com.xadrez.chess_backend.record.PageResponse;
 import com.xadrez.chess_backend.repository.GameRepository;
 import com.xadrez.chess_backend.repository.MoveRepository;
 import com.xadrez.chess_backend.repository.UserRepository;
@@ -71,8 +75,9 @@ public class GameService {
         gameRestorationService.restore(game, moves);
 
         List<PiecePositionResponse> board = game.getBoard().getPieces().entrySet().stream()
-                .sorted(Comparator.comparingInt((java.util.Map.Entry<com.xadrez.chess_backend.record.Position,
-                        com.xadrez.chess_backend.model.chess.Piece> entry) -> entry.getKey().row())
+                .sorted(Comparator.comparingInt((
+                        java.util.Map.Entry<com.xadrez.chess_backend.record.Position, com.xadrez.chess_backend.model.chess.Piece> entry) -> entry
+                                .getKey().row())
                         .thenComparingInt(entry -> entry.getKey().column()))
                 .map(entry -> new PiecePositionResponse(entry.getKey(), entry.getValue()))
                 .toList();
@@ -97,6 +102,38 @@ public class GameService {
     public void abandonGamesFor(UUID abandonedPlayerId) {
         gameRepository.findByStatusAndPlayerIdForUpdate(GameStatus.IN_PROGRESS, abandonedPlayerId)
                 .forEach(game -> abandonGame(game, abandonedPlayerId));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<PlayerGameHistoryResponse> getHistory(UUID userId, Pageable pageable) {
+        Page<Game> games = gameRepository
+                .findByStatusAndWhitePlayerIdOrStatusAndBlackPlayerIdOrderByFinishedAtDesc(
+                        GameStatus.FINISHED, userId,
+                        GameStatus.FINISHED, userId,
+                        pageable);
+
+        List<PlayerGameHistoryResponse> content = games.getContent().stream()
+                .map(game -> {
+                    boolean isWhite = game.getWhitePlayer().getId().equals(userId);
+                    User opponent = isWhite ? game.getBlackPlayer() : game.getWhitePlayer();
+
+                    return new PlayerGameHistoryResponse(
+                            game.getId(),
+                            opponent.getUsername(),
+                            isWhite,
+                            game.getResult(),
+                            game.getInitialTimeSeconds(),
+                            game.getIncrementSeconds(),
+                            game.getFinishedAt());
+                })
+                .toList();
+
+        return new PageResponse<>(
+                content,
+                games.getTotalElements(),
+                games.getTotalPages(),
+                games.getSize(),
+                games.getNumber());
     }
 
     private Game findGame(UUID gameId) {

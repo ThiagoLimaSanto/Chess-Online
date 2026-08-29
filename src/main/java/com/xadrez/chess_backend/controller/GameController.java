@@ -2,6 +2,8 @@ package com.xadrez.chess_backend.controller;
 
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.xadrez.chess_backend.dto.game.CreateGameRequest;
 import com.xadrez.chess_backend.dto.game.GameDetailsResponse;
 import com.xadrez.chess_backend.dto.game.GameResponse;
+import com.xadrez.chess_backend.dto.history.PlayerGameHistoryResponse;
+import com.xadrez.chess_backend.record.PageResponse;
 import com.xadrez.chess_backend.service.GameService;
 
 import jakarta.validation.Valid;
@@ -39,6 +43,13 @@ public class GameController {
     public ResponseEntity<GameDetailsResponse> getGame(@PathVariable UUID gameId) {
         GameDetailsResponse response = gameService.getGameDetails(gameId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/history/{userId}")
+    public ResponseEntity<PageResponse<PlayerGameHistoryResponse>> getHistory(
+            @PathVariable UUID userId,
+            @PageableDefault(size = 5) Pageable pageable) {
+        return ResponseEntity.ok(gameService.getHistory(userId, pageable));
     }
 
     @PostMapping("/{gameId}/abandon")
