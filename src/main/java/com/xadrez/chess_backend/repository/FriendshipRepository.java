@@ -8,11 +8,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.xadrez.chess_backend.enums.FriendshipStatus;
 import com.xadrez.chess_backend.model.Friendship;
-
-import io.lettuce.core.dynamic.annotation.Param;
 
 public interface FriendshipRepository
                 extends JpaRepository<Friendship, UUID> {
@@ -21,13 +20,16 @@ public interface FriendshipRepository
                             SELECT COUNT(f) > 0
                             FROM Friendship f
                             WHERE
-                                (f.requester.id = :user1 AND f.receiver.id = :user2)
-                                OR
-                                (f.requester.id = :user2 AND f.receiver.id = :user1)
-                        """)
-        boolean existsFriendshipBetween(
-                        UUID user1,
-                        UUID user2);
+                                f.status = :status
+                                AND (
+                                    (f.requester.id = :user1 AND f.receiver.id = :user2)
+                                    OR (f.requester.id = :user2 AND f.receiver.id = :user1)
+                                )
+        """)
+        boolean existsFriendshipBetweenWithStatus(
+                        @Param("user1") UUID user1,
+                        @Param("user2") UUID user2,
+                        @Param("status") FriendshipStatus status);
 
         @Query("""
                             SELECT f

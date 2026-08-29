@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.xadrez.chess_backend.dto.friendship.FriendshipResponse;
 import com.xadrez.chess_backend.enums.FriendshipStatus;
@@ -95,6 +96,7 @@ public class FriendshipService {
                 friendships.getNumber());
     }
 
+    @Transactional
     public void sendRequest(UUID receiverId) {
         UUID requesterId = AuthenticationUtils.getAuthenticatedUserId();
 
@@ -107,8 +109,14 @@ public class FriendshipService {
         User receiver = userRepository.findById(receiverId)
                 .orElseThrow(() -> new FriendshipNotFoundException("Usuário não encontrado."));
 
-        if (friendshipRepository.existsFriendshipBetween(requesterId, receiverId)) {
-            throw new FriendshipAlreadyExistsException("Já existe uma solicitação de amizade");
+        if (friendshipRepository.existsFriendshipBetweenWithStatus(
+                requesterId, receiverId, FriendshipStatus.ACCEPTED)) {
+            throw new FriendshipAlreadyExistsException("Vocês já são amigos.");
+        }
+
+        if (friendshipRepository.existsFriendshipBetweenWithStatus(
+                requesterId, receiverId, FriendshipStatus.PENDING)) {
+            throw new FriendshipAlreadyExistsException("Já existe uma solicitação de amizade pendente.");
         }
 
         Friendship friendship = new Friendship(requester, receiver);
@@ -116,6 +124,7 @@ public class FriendshipService {
         friendshipRepository.save(friendship);
     }
 
+    @Transactional
     public void accept(UUID requesterId) {
 
         UUID receiverId = AuthenticationUtils.getAuthenticatedUserId();
@@ -130,6 +139,7 @@ public class FriendshipService {
         friendshipRepository.save(friendship);
     }
 
+    @Transactional
     public void reject(UUID requesterId) {
 
         UUID receiverId = AuthenticationUtils.getAuthenticatedUserId();
