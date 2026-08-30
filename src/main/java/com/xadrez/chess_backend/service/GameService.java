@@ -15,6 +15,7 @@ import com.xadrez.chess_backend.dto.game.CreateGameRequest;
 import com.xadrez.chess_backend.dto.game.GameDetailsResponse;
 import com.xadrez.chess_backend.dto.game.GameResponse;
 import com.xadrez.chess_backend.dto.game.PiecePositionResponse;
+import com.xadrez.chess_backend.dto.game.DrawOfferResponse;
 import com.xadrez.chess_backend.dto.history.PlayerGameHistoryResponse;
 import com.xadrez.chess_backend.dto.move.MoveHistoryResponse;
 import com.xadrez.chess_backend.enums.GameResult;
@@ -31,7 +32,10 @@ import com.xadrez.chess_backend.model.User;
 import com.xadrez.chess_backend.record.GameAbandonedEvent;
 import com.xadrez.chess_backend.record.GameCreatedEvent;
 import com.xadrez.chess_backend.record.GameFinishedEvent;
+import com.xadrez.chess_backend.record.DrawOfferedEvent;
+import com.xadrez.chess_backend.record.DrawOfferRespondedEvent;
 import com.xadrez.chess_backend.record.PageResponse;
+import com.xadrez.chess_backend.redis.DrawOfferStore;
 import com.xadrez.chess_backend.repository.GameRepository;
 import com.xadrez.chess_backend.repository.MoveRepository;
 import com.xadrez.chess_backend.repository.UserRepository;
@@ -48,6 +52,7 @@ public class GameService {
     private final MoveRepository moveRepository;
     private final GameRestorationService gameRestorationService;
     private final ApplicationEventPublisher eventPublisher;
+    private final DrawOfferStore drawOfferStore;
 
     @Transactional
     public GameResponse createGame(CreateGameRequest request) {
@@ -120,6 +125,55 @@ public class GameService {
         abandonGame(game, abandonedPlayerId);
     }
 
+    @Transactional(readOnly = true)
+    public DrawOfferResponse getDrawOffer(UUID gameId, UUID playerId) {
+        Game game = findGame(gameId);
+        ensurePlayerBelongsToGame(game, playerId);
+        return new DrawOfferResponse(drawOfferStore.findOfferer(gameId).orElse(null));
+    }
+
+    @Transactional
+    public DrawOfferResponse offerDraw(UUID gameId, UUID playerId) {
+        Game game = findGameForUpdate(gameId);
+        ensureGameIsInProgress(game);
+        ensurePlayerBelongsToGame(game, playerId);
+
+        Optional<UUID> currentOffer = drawOfferStore.findOfferer(gameId);
+        if (currentOffer.isPresent()) {
+            String message = currentOffer.get().equals(playerId)
+                    ? "Você já solicitou empate"
+                    : "Seu adversário já solicitou empate";
+            throw new InvalidMoveException(message);
+        }
+
+        drawOfferStore.save(gameId, playerId);
+        eventPublisher.publishEvent(new DrawOfferedEvent(gameId, playerId));
+        return new DrawOfferResponse(playerId);
+    }
+
+    @Transactional
+    public void respondToDrawOffer(UUID gameId, UUID playerId, boolean accepted) {
+        Game game = findGameForUpdate(gameId);
+        ensureGameIsInProgress(game);
+        ensurePlayerBelongsToGame(game, playerId);
+
+        UUID offeredBy = drawOfferStore.findOfferer(gameId)
+                .orElseThrow(() -> new InvalidMoveException("Não há solicitação de empate pendente"));
+        if (offeredBy.equals(playerId)) {
+            throw new InvalidMoveException("Apenas o adversário pode responder à solicitação de empate");
+        }
+
+        drawOfferStore.delete(gameId);
+        if (accepted) {
+            List<Move> moves = moveRepository.findByGameIdOrderByMoveNumberAsc(gameId);
+            gameRestorationService.restore(game, moves);
+            game.finish(GameResult.DRAW);
+            gameRepository.save(game);
+            eventPublisher.publishEvent(new GameFinishedEvent(gameId, GameResult.DRAW));
+        }
+        eventPublisher.publishEvent(new DrawOfferRespondedEvent(gameId, playerId, accepted));
+    }
+
     @Transactional
     public void abandonGamesFor(UUID abandonedPlayerId) {
         gameRepository.findByStatusAndPlayerIdForUpdate(GameStatus.IN_PROGRESS, abandonedPlayerId)
@@ -163,6 +217,11 @@ public class GameService {
                 .orElseThrow(() -> new GameNotFoundException("Partida não encontrada"));
     }
 
+    private Game findGameForUpdate(UUID gameId) {
+        return gameRepository.findByIdForUpdate(gameId)
+                .orElseThrow(() -> new GameNotFoundException("Partida não encontrada"));
+    }
+
     private User findPlayerForUpdate(UUID playerId) {
         return userRepository.findByIdForUpdate(playerId)
                 .orElseThrow(() -> new UserNotFoundException("Jogador não encontrado"));
@@ -184,6 +243,12 @@ public class GameService {
         }
     }
 
+    private void ensureGameIsInProgress(Game game) {
+        if (game.getStatus() != GameStatus.IN_PROGRESS) {
+            throw new InvalidMoveException("A partida já foi encerrada");
+        }
+    }
+
     private List<MoveHistoryResponse> toMoveHistory(List<Move> moves) {
         return moves.stream().map(MoveHistoryResponse::new).toList();
     }
@@ -194,6 +259,7 @@ public class GameService {
         gameRestorationService.restore(game, moves);
         game.finish(result);
         gameRepository.save(game);
+        drawOfferStore.delete(game.getId());
 
         eventPublisher.publishEvent(new GameAbandonedEvent(game.getId(), abandonedPlayerId, result));
         eventPublisher.publishEvent(new GameFinishedEvent(game.getId(), result));

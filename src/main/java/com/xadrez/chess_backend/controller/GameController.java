@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.xadrez.chess_backend.dto.game.CreateGameRequest;
 import com.xadrez.chess_backend.dto.game.GameDetailsResponse;
 import com.xadrez.chess_backend.dto.game.GameResponse;
+import com.xadrez.chess_backend.dto.game.DrawOfferResponse;
+import com.xadrez.chess_backend.dto.game.RespondDrawOfferRequest;
 import com.xadrez.chess_backend.dto.history.PlayerGameHistoryResponse;
 import com.xadrez.chess_backend.model.User;
 import com.xadrez.chess_backend.record.PageResponse;
@@ -61,6 +63,30 @@ public class GameController {
             @PathVariable UUID gameId,
             @AuthenticationPrincipal User authenticatedUser) {
         gameService.abandonGame(gameId, authenticatedUser.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{gameId}/draw-offer")
+    public ResponseEntity<DrawOfferResponse> getDrawOffer(
+            @PathVariable UUID gameId,
+            @AuthenticationPrincipal User authenticatedUser) {
+        return ResponseEntity.ok(gameService.getDrawOffer(gameId, authenticatedUser.getId()));
+    }
+
+    @PostMapping("/{gameId}/draw-offer")
+    public ResponseEntity<DrawOfferResponse> offerDraw(
+            @PathVariable UUID gameId,
+            @AuthenticationPrincipal User authenticatedUser) {
+        return ResponseEntity.ok(gameService.offerDraw(gameId, authenticatedUser.getId()));
+    }
+
+    @PostMapping("/{gameId}/draw-offer/respond")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> respondToDrawOffer(
+            @PathVariable UUID gameId,
+            @Valid @RequestBody RespondDrawOfferRequest request,
+            @AuthenticationPrincipal User authenticatedUser) {
+        gameService.respondToDrawOffer(gameId, authenticatedUser.getId(), request.accepted());
         return ResponseEntity.noContent().build();
     }
 }

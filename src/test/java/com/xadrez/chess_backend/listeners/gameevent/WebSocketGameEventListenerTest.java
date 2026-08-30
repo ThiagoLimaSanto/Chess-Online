@@ -12,6 +12,8 @@ import com.xadrez.chess_backend.record.GameCreatedEvent;
 import com.xadrez.chess_backend.record.GameAbandonedEvent;
 import com.xadrez.chess_backend.record.GameFinishedEvent;
 import com.xadrez.chess_backend.record.MoveMadeEvent;
+import com.xadrez.chess_backend.record.DrawOfferedEvent;
+import com.xadrez.chess_backend.record.DrawOfferRespondedEvent;
 import com.xadrez.chess_backend.websocket.GameUpdatePublisher;
 
 class WebSocketGameEventListenerTest {
@@ -67,6 +69,30 @@ class WebSocketGameEventListenerTest {
         assertEquals(
                 GameEventResponse.gameAbandoned(gameId, abandonedPlayer, GameResult.BLACK_WIN),
                 publisher.lastEvent);
+    }
+
+    @Test
+    void publishesDrawOfferNotification() {
+        RecordingGameUpdatePublisher publisher = new RecordingGameUpdatePublisher();
+        WebSocketGameEventListener listener = new WebSocketGameEventListener(publisher);
+        UUID gameId = UUID.randomUUID();
+        UUID offeredBy = UUID.randomUUID();
+
+        listener.onDrawOffered(new DrawOfferedEvent(gameId, offeredBy));
+
+        assertEquals(GameEventResponse.drawOffered(gameId, offeredBy), publisher.lastEvent);
+    }
+
+    @Test
+    void publishesDrawOfferResponseNotification() {
+        RecordingGameUpdatePublisher publisher = new RecordingGameUpdatePublisher();
+        WebSocketGameEventListener listener = new WebSocketGameEventListener(publisher);
+        UUID gameId = UUID.randomUUID();
+        UUID respondedBy = UUID.randomUUID();
+
+        listener.onDrawOfferResponded(new DrawOfferRespondedEvent(gameId, respondedBy, true));
+
+        assertEquals(GameEventResponse.drawOfferResponded(gameId, respondedBy, true), publisher.lastEvent);
     }
 
     private static class RecordingGameUpdatePublisher implements GameUpdatePublisher {

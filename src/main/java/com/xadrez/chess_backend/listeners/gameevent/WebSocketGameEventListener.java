@@ -10,6 +10,8 @@ import com.xadrez.chess_backend.record.GameCreatedEvent;
 import com.xadrez.chess_backend.record.GameAbandonedEvent;
 import com.xadrez.chess_backend.record.GameFinishedEvent;
 import com.xadrez.chess_backend.record.MoveMadeEvent;
+import com.xadrez.chess_backend.record.DrawOfferedEvent;
+import com.xadrez.chess_backend.record.DrawOfferRespondedEvent;
 import com.xadrez.chess_backend.websocket.GameUpdatePublisher;
 
 import lombok.RequiredArgsConstructor;
@@ -42,5 +44,17 @@ public class WebSocketGameEventListener {
     public void onGameAbandoned(GameAbandonedEvent event) {
         gameUpdatePublisher.publish(GameEventResponse.gameAbandoned(
                 event.gameId(), event.abandonedPlayerId(), event.result()));
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onDrawOffered(DrawOfferedEvent event) {
+        gameUpdatePublisher.publish(GameEventResponse.drawOffered(
+                event.gameId(), event.offeredByPlayerId()));
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onDrawOfferResponded(DrawOfferRespondedEvent event) {
+        gameUpdatePublisher.publish(GameEventResponse.drawOfferResponded(
+                event.gameId(), event.respondedByPlayerId(), event.accepted()));
     }
 }
