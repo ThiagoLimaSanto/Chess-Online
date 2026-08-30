@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import com.xadrez.chess_backend.dto.game.GameEventResponse;
 import com.xadrez.chess_backend.enums.GameResult;
 import com.xadrez.chess_backend.record.GameCreatedEvent;
+import com.xadrez.chess_backend.record.GameAbandonedEvent;
 import com.xadrez.chess_backend.record.GameFinishedEvent;
 import com.xadrez.chess_backend.record.MoveMadeEvent;
 import com.xadrez.chess_backend.websocket.GameUpdatePublisher;
@@ -51,6 +52,21 @@ class WebSocketGameEventListenerTest {
         assertEquals(whitePlayerId, publisher.firstPlayerId);
         assertEquals(blackPlayerId, publisher.secondPlayerId);
         assertEquals(GameEventResponse.gameCreated(gameId), publisher.lastEvent);
+    }
+
+    @Test
+    void publishesAbandonmentNotification() {
+        RecordingGameUpdatePublisher publisher = new RecordingGameUpdatePublisher();
+        WebSocketGameEventListener listener = new WebSocketGameEventListener(publisher);
+        UUID gameId = UUID.randomUUID();
+        UUID abandonedPlayer = UUID.randomUUID();
+
+        listener.onGameAbandoned(new GameAbandonedEvent(
+                gameId, abandonedPlayer, GameResult.BLACK_WIN));
+
+        assertEquals(
+                GameEventResponse.gameAbandoned(gameId, abandonedPlayer, GameResult.BLACK_WIN),
+                publisher.lastEvent);
     }
 
     private static class RecordingGameUpdatePublisher implements GameUpdatePublisher {

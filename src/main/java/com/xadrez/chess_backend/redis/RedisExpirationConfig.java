@@ -2,6 +2,7 @@ package com.xadrez.chess_backend.redis;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
@@ -9,6 +10,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
+@Profile("!test")
 @RequiredArgsConstructor
 public class RedisExpirationConfig {
 

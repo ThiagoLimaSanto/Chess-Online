@@ -105,6 +105,22 @@ class CheckServiceTest {
         }
     }
 
+    @Test
+    void excludesMoveThatWouldExposeOwnKing() {
+        Board board = new Board();
+        Position pinnedRook = new Position(1, 4);
+        board.setPiece(new Position(0, 4), new King(PieceColor.WHITE));
+        board.setPiece(pinnedRook, new Rook(PieceColor.WHITE));
+        board.setPiece(new Position(7, 4), new Rook(PieceColor.BLACK));
+        board.setPiece(new Position(7, 7), new King(PieceColor.BLACK));
+
+        List<Position> legalMoves = checkService.legalMovesFor(
+                board, PieceColor.WHITE, List.of(), pinnedRook);
+
+        assertFalse(legalMoves.contains(new Position(1, 3)));
+        assertTrue(legalMoves.contains(new Position(2, 4)));
+    }
+
     private void assertCheck(com.xadrez.chess_backend.model.chess.Piece attackingPiece, Position attackerPosition) {
         Board board = boardWithWhiteKing();
         board.setPiece(attackerPosition, attackingPiece);

@@ -46,6 +46,18 @@ class PerformanceServiceTest {
         assertEquals(1200, fixture.blackPerformance.getRating());
     }
 
+    @Test
+    void registersBlackVictoryAndWhiteLoss() throws Exception {
+        Fixture fixture = fixture();
+
+        fixture.service.registerGameResult(fixture.gameId, GameResult.BLACK_WIN);
+
+        assertEquals(1, fixture.whitePerformance.getLoss());
+        assertEquals(1184, fixture.whitePerformance.getRating());
+        assertEquals(1, fixture.blackPerformance.getVictory());
+        assertEquals(1216, fixture.blackPerformance.getRating());
+    }
+
     private Fixture fixture() throws Exception {
         UUID gameId = UUID.fromString("00000000-0000-0000-0000-000000000010");
         UUID whiteId = UUID.fromString("00000000-0000-0000-0000-000000000001");

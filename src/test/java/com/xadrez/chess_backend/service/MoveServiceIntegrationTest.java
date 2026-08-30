@@ -15,9 +15,11 @@ import com.xadrez.chess_backend.enums.GameResult;
 import com.xadrez.chess_backend.enums.GameStatus;
 import com.xadrez.chess_backend.factory.GameFactory;
 import com.xadrez.chess_backend.model.Game;
+import com.xadrez.chess_backend.model.Performance;
 import com.xadrez.chess_backend.model.User;
 import com.xadrez.chess_backend.repository.GameRepository;
 import com.xadrez.chess_backend.repository.MoveRepository;
+import com.xadrez.chess_backend.repository.PerformanceRepository;
 import com.xadrez.chess_backend.repository.UserRepository;
 
 @SpringBootTest
@@ -39,6 +41,9 @@ class MoveServiceIntegrationTest {
 
     @Autowired
     private MoveRepository moveRepository;
+
+    @Autowired
+    private PerformanceRepository performanceRepository;
 
     @Autowired
     private GameFactory gameFactory;
@@ -78,7 +83,12 @@ class MoveServiceIntegrationTest {
     private User saveUser(String username) {
         User user = new User();
         user.setUsername(username);
-        return userRepository.save(user);
+        user.setPasswordHash("test-password-hash");
+        User savedUser = userRepository.save(user);
+        Performance performance = new Performance(savedUser);
+        performance.setRating(1200);
+        performanceRepository.save(performance);
+        return savedUser;
     }
 
     private MakeMoveRequest request(User player, String from, String to) {
