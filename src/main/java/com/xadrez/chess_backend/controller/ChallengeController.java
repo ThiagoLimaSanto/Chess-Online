@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.xadrez.chess_backend.dto.challenge.ChallengeRequest;
 import com.xadrez.chess_backend.dto.challenge.ChallengeResponse;
+import com.xadrez.chess_backend.dto.game.GameResponse;
 import com.xadrez.chess_backend.enums.ChallengeStatus;
 import com.xadrez.chess_backend.record.PageResponse;
 import com.xadrez.chess_backend.service.ChallengeService;
@@ -51,9 +52,8 @@ public class ChallengeController {
     };
 
     @PostMapping("/{challengeId}/accept")
-    public ResponseEntity<Void> accept(@PathVariable UUID challengeId) {
-        challengeService.accept(challengeId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<GameResponse> accept(@PathVariable UUID challengeId) {
+        return ResponseEntity.ok(challengeService.accept(challengeId));
     }
 
     @PostMapping("/{challengeId}/reject")
