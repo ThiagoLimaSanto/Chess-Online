@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.xadrez.chess_backend.dto.move.MoveHistoryResponse;
 import com.xadrez.chess_backend.enums.GameResult;
 import com.xadrez.chess_backend.enums.GameStatus;
+import com.xadrez.chess_backend.enums.GameMode;
 import com.xadrez.chess_backend.model.Game;
 
 import lombok.Getter;
@@ -27,6 +28,7 @@ public class GameDetailsResponse {
     private final long incrementSeconds;
     private final List<PiecePositionResponse> board;
     private final List<MoveHistoryResponse> moves;
+    private final GameMode gameMode;
 
     public GameDetailsResponse(Game game, List<PiecePositionResponse> board,
             List<MoveHistoryResponse> moves) {
@@ -43,5 +45,6 @@ public class GameDetailsResponse {
         this.incrementSeconds = game.getIncrementSeconds();
         this.board = board;
         this.moves = moves;
+        this.gameMode = game.getGameMode();
     }
 }

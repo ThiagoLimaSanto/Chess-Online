@@ -77,6 +77,7 @@ public class GameService {
 
         Game game = gameFactory.createGame(whitePlayer, blackPlayer,
                 request.getInitialTimeSeconds(), request.getIncrementSeconds());
+        game.setGameMode(request.getGameMode());
 
         Game savedGame = gameRepository.save(game);
 
@@ -200,6 +201,7 @@ public class GameService {
                             game.getResult(),
                             game.getInitialTimeSeconds(),
                             game.getIncrementSeconds(),
+                            game.getGameMode(),
                             game.getFinishedAt());
                 })
                 .toList();

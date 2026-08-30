@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.xadrez.chess_backend.enums.GameResult;
 import com.xadrez.chess_backend.enums.GameStatus;
+import com.xadrez.chess_backend.enums.GameMode;
 import com.xadrez.chess_backend.model.chess.Board;
 import com.xadrez.chess_backend.state.game.GameState;
 
@@ -62,6 +63,9 @@ public class Game {
 
     private Long incrementSeconds;
 
+    @Enumerated(EnumType.STRING)
+    private GameMode gameMode = GameMode.RAPID;
+
     @Transient
     private GameState state;
 
@@ -79,6 +83,10 @@ public class Game {
     public void setTimeControl(long initialTimeSeconds, long incrementSeconds) {
         this.initialTimeSeconds = initialTimeSeconds;
         this.incrementSeconds = incrementSeconds;
+    }
+
+    public void setGameMode(GameMode gameMode) {
+        this.gameMode = gameMode;
     }
 
     public void start() {

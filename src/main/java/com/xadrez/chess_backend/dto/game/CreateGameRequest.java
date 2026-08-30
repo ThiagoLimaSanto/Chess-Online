@@ -8,6 +8,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.xadrez.chess_backend.enums.GameMode;
 
 @Getter
 @Setter
@@ -27,4 +28,7 @@ public class CreateGameRequest {
     @NotNull(message = "Incremento não pode ser vazio")
     @PositiveOrZero(message = "Incremento não pode ser negativo")
     private Long incrementSeconds;
+
+    @NotNull(message = "Modo de jogo não pode ser vazio")
+    private GameMode gameMode = GameMode.RAPID;
 }

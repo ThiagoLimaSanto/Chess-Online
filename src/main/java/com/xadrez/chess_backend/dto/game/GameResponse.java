@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.xadrez.chess_backend.enums.GameResult;
 import com.xadrez.chess_backend.enums.GameStatus;
+import com.xadrez.chess_backend.enums.GameMode;
 import com.xadrez.chess_backend.model.Game;
 
 import lombok.Getter;
@@ -21,6 +22,7 @@ public class GameResponse {
     private GameResult result;
     private LocalDateTime createdAt;
     private LocalDateTime finishedAt;
+    private GameMode gameMode;
 
     public GameResponse(Game game) {
         this.id = game.getId();
@@ -30,5 +32,6 @@ public class GameResponse {
         this.result = game.getResult();
         this.createdAt = game.getCreatedAt();
         this.finishedAt = game.getFinishedAt();
+        this.gameMode = game.getGameMode();
     }
 }

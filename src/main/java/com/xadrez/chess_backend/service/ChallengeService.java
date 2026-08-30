@@ -13,6 +13,7 @@ import com.xadrez.chess_backend.dto.game.CreateGameRequest;
 import com.xadrez.chess_backend.dto.game.GameResponse;
 import com.xadrez.chess_backend.enums.ChallengeStatus;
 import com.xadrez.chess_backend.enums.FriendshipStatus;
+import com.xadrez.chess_backend.enums.GameMode;
 import com.xadrez.chess_backend.exception.ChallengeNotFoundException;
 import com.xadrez.chess_backend.exception.IllegalRequestChallenge;
 import com.xadrez.chess_backend.exception.UserNotFoundException;
@@ -110,6 +111,8 @@ public class ChallengeService {
         gameRequest.setBlackPlayer(challenge.getChallengedUsername().getId());
         gameRequest.setInitialTimeSeconds(challenge.getInitialTimeSeconds());
         gameRequest.setIncrementSeconds(challenge.getIncrementSeconds());
+        gameRequest.setGameMode(GameMode.fromTimeControl(
+                challenge.getInitialTimeSeconds(), challenge.getIncrementSeconds()));
 
         GameResponse game = gameService.createGame(gameRequest);
         challenge.accept();

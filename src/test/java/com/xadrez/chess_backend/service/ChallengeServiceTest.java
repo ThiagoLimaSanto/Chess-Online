@@ -20,6 +20,7 @@ import com.xadrez.chess_backend.dto.game.CreateGameRequest;
 import com.xadrez.chess_backend.dto.game.GameResponse;
 import com.xadrez.chess_backend.enums.ChallengeStatus;
 import com.xadrez.chess_backend.enums.FriendshipStatus;
+import com.xadrez.chess_backend.enums.GameMode;
 import com.xadrez.chess_backend.exception.IllegalRequestChallenge;
 import com.xadrez.chess_backend.model.Challenge;
 import com.xadrez.chess_backend.model.User;
@@ -98,6 +99,7 @@ class ChallengeServiceTest {
 
         assertEquals(challenger.getId(), gameService.createRequest.getWhitePlayer());
         assertEquals(challenged.getId(), gameService.createRequest.getBlackPlayer());
+        assertEquals(GameMode.RAPID, gameService.createRequest.getGameMode());
         assertEquals(ChallengeStatus.ACCEPTED, challenge.getStatus());
         assertSame(expectedGame, game);
     }

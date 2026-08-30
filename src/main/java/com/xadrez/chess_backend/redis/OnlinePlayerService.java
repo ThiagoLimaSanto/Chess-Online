@@ -13,13 +13,14 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
 import com.xadrez.chess_backend.record.PlayerDisconnectedEvent;
+import com.xadrez.chess_backend.enums.GameMode;
 
 @Service
 @RequiredArgsConstructor
 public class OnlinePlayerService {
 
     private static final String ONLINE_PLAYERS_KEY = "online:player:";
-    private static final String MATCH_MAKING_QUEUE_KEY = "matchmaking:queue";
+    private static final String MATCH_MAKING_QUEUE_KEY_PREFIX = "matchmaking:queue:";
     private static final Long ONLINE_TTL_SECONDS = 180L;
 
     private final StringRedisTemplate redisTemplate;
@@ -34,7 +35,7 @@ public class OnlinePlayerService {
 
     public void setOffline(UUID playerId) {
         String key = ONLINE_PLAYERS_KEY + playerId.toString();
-        redisTemplate.opsForSet().remove(MATCH_MAKING_QUEUE_KEY, playerId.toString());
+        removeFromMatchmakingQueues(playerId);
 
         if (Boolean.TRUE.equals(redisTemplate.delete(key))) {
             eventPublisher.publishEvent(new PlayerDisconnectedEvent(playerId));
@@ -42,7 +43,7 @@ public class OnlinePlayerService {
     }
 
     public void expireOffline(UUID playerId) {
-        redisTemplate.opsForSet().remove(MATCH_MAKING_QUEUE_KEY, playerId.toString());
+        removeFromMatchmakingQueues(playerId);
         eventPublisher.publishEvent(new PlayerDisconnectedEvent(playerId));
     }
 
@@ -65,6 +66,14 @@ public class OnlinePlayerService {
 
         if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
             redisTemplate.expire(key, Duration.ofSeconds(ONLINE_TTL_SECONDS));
+        }
+    }
+
+    private void removeFromMatchmakingQueues(UUID playerId) {
+        for (GameMode mode : GameMode.values()) {
+            redisTemplate.opsForSet().remove(
+                    MATCH_MAKING_QUEUE_KEY_PREFIX + mode.name().toLowerCase(),
+                    playerId.toString());
         }
     }
 }

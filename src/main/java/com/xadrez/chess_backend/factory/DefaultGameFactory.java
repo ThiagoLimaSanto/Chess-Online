@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.xadrez.chess_backend.model.Game;
 import com.xadrez.chess_backend.model.User;
+import com.xadrez.chess_backend.enums.GameMode;
 
 @Component
 public class DefaultGameFactory implements GameFactory {
@@ -22,6 +23,7 @@ public class DefaultGameFactory implements GameFactory {
 
         game.setPlayers(whitePlayer, blackPlayer);
         game.setTimeControl(initialTimeSeconds, incrementSeconds);
+        game.setGameMode(GameMode.fromTimeControl(initialTimeSeconds, incrementSeconds));
         game.setBoard(boardFactory.createInitialBoard());
         game.changeState(gameStateFactory.inProgress());
         
