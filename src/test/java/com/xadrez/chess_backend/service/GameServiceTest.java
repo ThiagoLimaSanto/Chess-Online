@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import com.xadrez.chess_backend.dto.game.CreateGameRequest;
 import com.xadrez.chess_backend.exception.PlayerAlreadyInGameException;
+import com.xadrez.chess_backend.exception.PlayerNotInGameException;
 import com.xadrez.chess_backend.factory.GameFactory;
 import com.xadrez.chess_backend.model.Game;
 import com.xadrez.chess_backend.model.User;
@@ -21,6 +22,42 @@ import com.xadrez.chess_backend.repository.GameRepository;
 import com.xadrez.chess_backend.repository.UserRepository;
 
 class GameServiceTest {
+
+    @Test
+    void doesNotExposeGameDetailsToAnExternalPlayer() throws Exception {
+        UUID whiteId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        UUID blackId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+        UUID outsiderId = UUID.fromString("00000000-0000-0000-0000-000000000003");
+        Game game = new Game();
+        game.setPlayers(user(whiteId, "white"), user(blackId, "black"));
+
+        GameRepository gameRepository = proxy(GameRepository.class, (method, args) -> {
+            if (method.getName().equals("findById")) return Optional.of(game);
+            return null;
+        });
+        GameService service = new GameService(gameRepository, null, null, null, null, null);
+
+        assertThrows(PlayerNotInGameException.class,
+                () -> service.getGameDetails(UUID.randomUUID(), outsiderId));
+    }
+
+    @Test
+    void doesNotExposeMoveHistoryToAnExternalPlayer() throws Exception {
+        UUID whiteId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        UUID blackId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+        UUID outsiderId = UUID.fromString("00000000-0000-0000-0000-000000000003");
+        Game game = new Game();
+        game.setPlayers(user(whiteId, "white"), user(blackId, "black"));
+
+        GameRepository gameRepository = proxy(GameRepository.class, (method, args) -> {
+            if (method.getName().equals("findById")) return Optional.of(game);
+            return null;
+        });
+        GameService service = new GameService(gameRepository, null, null, null, null, null);
+
+        assertThrows(PlayerNotInGameException.class,
+                () -> service.getMoveHistory(UUID.randomUUID(), outsiderId));
+    }
 
     @Test
     void doesNotCreateGameWhenAPlayerAlreadyHasAnActiveGame() throws Exception {

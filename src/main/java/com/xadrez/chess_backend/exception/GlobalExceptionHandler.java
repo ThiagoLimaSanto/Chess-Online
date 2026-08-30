@@ -238,12 +238,12 @@ public class GlobalExceptionHandler {
             PlayerNotInGameException e) {
 
         ErrorResponse response = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                "Bad Request",
+                HttpStatus.FORBIDDEN.value(),
+                "Forbidden",
                 e.getMessage());
 
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.FORBIDDEN)
                 .body(response);
     }
 

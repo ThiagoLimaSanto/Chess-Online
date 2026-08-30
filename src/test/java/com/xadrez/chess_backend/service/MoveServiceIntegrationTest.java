@@ -56,7 +56,7 @@ class MoveServiceIntegrationTest {
 
         MoveResponse whiteMove = moveService.makeMove(request(white, "e2", "e4"), game.getId());
         MoveResponse blackMove = moveService.makeMove(request(black, "e7", "e5"), game.getId());
-        GameDetailsResponse details = gameService.getGameDetails(game.getId());
+        GameDetailsResponse details = gameService.getGameDetails(game.getId(), white.getId());
 
         assertEquals(1, whiteMove.getMoveNumber());
         assertEquals(2, blackMove.getMoveNumber());

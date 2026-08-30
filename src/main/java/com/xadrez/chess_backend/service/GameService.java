@@ -22,6 +22,7 @@ import com.xadrez.chess_backend.enums.GameStatus;
 import com.xadrez.chess_backend.exception.GameNotFoundException;
 import com.xadrez.chess_backend.exception.InvalidMoveException;
 import com.xadrez.chess_backend.exception.PlayerAlreadyInGameException;
+import com.xadrez.chess_backend.exception.PlayerNotInGameException;
 import com.xadrez.chess_backend.exception.UserNotFoundException;
 import com.xadrez.chess_backend.factory.GameFactory;
 import com.xadrez.chess_backend.model.Game;
@@ -80,8 +81,9 @@ public class GameService {
     }
 
     @Transactional(readOnly = true)
-    public GameDetailsResponse getGameDetails(UUID gameId) {
+    public GameDetailsResponse getGameDetails(UUID gameId, UUID playerId) {
         Game game = findGame(gameId);
+        ensurePlayerBelongsToGame(game, playerId);
         List<Move> moves = moveRepository.findByGameIdOrderByMoveNumberAsc(gameId);
         gameRestorationService.restore(game, moves);
 
@@ -97,8 +99,9 @@ public class GameService {
     }
 
     @Transactional(readOnly = true)
-    public List<MoveHistoryResponse> getMoveHistory(UUID gameId) {
-        findGame(gameId);
+    public List<MoveHistoryResponse> getMoveHistory(UUID gameId, UUID playerId) {
+        Game game = findGame(gameId);
+        ensurePlayerBelongsToGame(game, playerId);
         return toMoveHistory(moveRepository.findByGameIdOrderByMoveNumberAsc(gameId));
     }
 
@@ -169,6 +172,15 @@ public class GameService {
         if (!gameRepository.findByStatusAndPlayerId(GameStatus.IN_PROGRESS, player.getId()).isEmpty()) {
             throw new PlayerAlreadyInGameException(
                     "O jogador " + player.getUsername() + " já está em uma partida em andamento.");
+        }
+    }
+
+    private void ensurePlayerBelongsToGame(Game game, UUID playerId) {
+        boolean isWhitePlayer = game.getWhitePlayer().getId().equals(playerId);
+        boolean isBlackPlayer = game.getBlackPlayer().getId().equals(playerId);
+
+        if (!isWhitePlayer && !isBlackPlayer) {
+            throw new PlayerNotInGameException("Jogador não participa desta partida");
         }
     }
 

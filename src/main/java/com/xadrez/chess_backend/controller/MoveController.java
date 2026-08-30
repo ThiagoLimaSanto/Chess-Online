@@ -43,8 +43,10 @@ public class MoveController {
     }
 
     @GetMapping("/{gameId}/moves")
-    public ResponseEntity<List<MoveHistoryResponse>> getMoves(@PathVariable UUID gameId) {
-        List<MoveHistoryResponse> response = gameService.getMoveHistory(gameId);
+    public ResponseEntity<List<MoveHistoryResponse>> getMoves(
+            @PathVariable UUID gameId,
+            @AuthenticationPrincipal User authenticatedUser) {
+        List<MoveHistoryResponse> response = gameService.getMoveHistory(gameId, authenticatedUser.getId());
         return ResponseEntity.ok(response);
     }
 
