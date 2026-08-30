@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.Instant;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -101,7 +102,11 @@ public class GameService {
                 .map(entry -> new PiecePositionResponse(entry.getKey(), entry.getValue()))
                 .toList();
 
-        return new GameDetailsResponse(game, board, toMoveHistory(moves));
+        return new GameDetailsResponse(
+                game,
+                board,
+                toMoveHistory(moves),
+                GameClock.snapshot(game, moves.size(), Instant.now()));
     }
 
     @Transactional(readOnly = true)

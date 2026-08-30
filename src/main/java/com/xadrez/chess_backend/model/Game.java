@@ -1,6 +1,7 @@
 package com.xadrez.chess_backend.model;
 
 import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +64,12 @@ public class Game {
 
     private Long incrementSeconds;
 
+    private Long whiteTimeMillis;
+
+    private Long blackTimeMillis;
+
+    private Instant turnStartedAt;
+
     @Enumerated(EnumType.STRING)
     private GameMode gameMode = GameMode.RAPID;
 
@@ -83,6 +90,15 @@ public class Game {
     public void setTimeControl(long initialTimeSeconds, long incrementSeconds) {
         this.initialTimeSeconds = initialTimeSeconds;
         this.incrementSeconds = incrementSeconds;
+        this.whiteTimeMillis = initialTimeSeconds * 1000;
+        this.blackTimeMillis = initialTimeSeconds * 1000;
+        this.turnStartedAt = Instant.now();
+    }
+
+    public void updateClock(long whiteTimeMillis, long blackTimeMillis, Instant turnStartedAt) {
+        this.whiteTimeMillis = Math.max(0, whiteTimeMillis);
+        this.blackTimeMillis = Math.max(0, blackTimeMillis);
+        this.turnStartedAt = turnStartedAt;
     }
 
     public void setGameMode(GameMode gameMode) {

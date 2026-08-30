@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.time.Instant;
 
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +20,9 @@ import com.xadrez.chess_backend.dto.move.MakeMoveRequest;
 import com.xadrez.chess_backend.dto.move.MoveResponse;
 import com.xadrez.chess_backend.enums.PieceColor;
 import com.xadrez.chess_backend.exception.InvalidMoveException;
+import com.xadrez.chess_backend.exception.GameTimeExpiredException;
+import com.xadrez.chess_backend.enums.GameResult;
+import com.xadrez.chess_backend.enums.GameStatus;
 import com.xadrez.chess_backend.exception.NotYourTurnException;
 import com.xadrez.chess_backend.factory.BoardFactory;
 import com.xadrez.chess_backend.factory.ChessPromotionFactory;
@@ -89,6 +93,20 @@ class MoveServiceTest {
         assertEquals(false, fixture.moveSaved.get());
     }
 
+    @Test
+    void finishesTheGameWhenTheActivePlayersTimeHasExpired() throws Exception {
+        Fixture fixture = fixture();
+        fixture.game.updateClock(0, 600_000, Instant.now().minusSeconds(1));
+
+        assertThrows(GameTimeExpiredException.class, () -> fixture.service.makeMove(
+                request(fixture.white.getId(), "e2", "e4"), fixture.gameId, fixture.white.getId()));
+
+        assertEquals(GameStatus.FINISHED, fixture.game.getStatus());
+        assertEquals(GameResult.BLACK_WIN, fixture.game.getResult());
+        assertEquals(false, fixture.moveSaved.get());
+        assertTrue(fixture.gameSaved.get());
+    }
+
     private Fixture fixture() throws Exception {
         UUID gameId = UUID.randomUUID();
         User white = user(UUID.randomUUID(), "white");
@@ -107,6 +125,7 @@ class MoveServiceTest {
         Game game = new Game();
         setId(game, gameId);
         game.setPlayers(white, black);
+        game.setTimeControl(600, 0);
         game.setBoard(boardFactory.createInitialBoard());
         game.changeState(inProgressState);
         List<Move> moves = new ArrayList<>();

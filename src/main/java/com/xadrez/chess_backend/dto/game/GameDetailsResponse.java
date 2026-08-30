@@ -8,6 +8,7 @@ import com.xadrez.chess_backend.dto.move.MoveHistoryResponse;
 import com.xadrez.chess_backend.enums.GameResult;
 import com.xadrez.chess_backend.enums.GameStatus;
 import com.xadrez.chess_backend.enums.GameMode;
+import com.xadrez.chess_backend.enums.PieceColor;
 import com.xadrez.chess_backend.model.Game;
 
 import lombok.Getter;
@@ -29,9 +30,13 @@ public class GameDetailsResponse {
     private final List<PiecePositionResponse> board;
     private final List<MoveHistoryResponse> moves;
     private final GameMode gameMode;
+    private final long whiteTimeMillis;
+    private final long blackTimeMillis;
+    private final long serverTimeMillis;
+    private final PieceColor activeColor;
 
     public GameDetailsResponse(Game game, List<PiecePositionResponse> board,
-            List<MoveHistoryResponse> moves) {
+            List<MoveHistoryResponse> moves, GameClockSnapshot clock) {
         this.id = game.getId();
         this.whitePlayer = game.getWhitePlayer().getId();
         this.whitePlayerUsername = game.getWhitePlayer().getUsername();
@@ -46,5 +51,9 @@ public class GameDetailsResponse {
         this.board = board;
         this.moves = moves;
         this.gameMode = game.getGameMode();
+        this.whiteTimeMillis = clock.whiteTimeMillis();
+        this.blackTimeMillis = clock.blackTimeMillis();
+        this.serverTimeMillis = clock.serverTimeMillis();
+        this.activeColor = clock.activeColor();
     }
 }

@@ -36,6 +36,9 @@ public interface GameRepository extends JpaRepository<Game, UUID> {
             @Param("status") GameStatus status,
             @Param("playerId") UUID playerId);
 
+    @Query("select game.id from Game game where game.status = :status")
+    List<UUID> findIdsByStatus(@Param("status") GameStatus status);
+
         Page<Game> findByStatusAndWhitePlayerIdOrStatusAndBlackPlayerIdOrderByFinishedAtDesc(
                         GameStatus whiteStatus,
                         UUID whitePlayerId,

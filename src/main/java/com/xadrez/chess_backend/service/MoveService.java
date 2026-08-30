@@ -3,6 +3,7 @@ package com.xadrez.chess_backend.service;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.time.Instant;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import com.xadrez.chess_backend.enums.GameResult;
 import com.xadrez.chess_backend.enums.GameStatus;
 import com.xadrez.chess_backend.enums.PieceColor;
 import com.xadrez.chess_backend.exception.GameNotFoundException;
+import com.xadrez.chess_backend.exception.GameTimeExpiredException;
 import com.xadrez.chess_backend.exception.InvalidMoveException;
 import com.xadrez.chess_backend.exception.NotYourTurnException;
 import com.xadrez.chess_backend.exception.PlayerNotInGameException;
@@ -49,7 +51,7 @@ public class MoveService {
         return makeMove(request, gameId, request.getPlayerId());
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = GameTimeExpiredException.class)
     public MoveResponse makeMove(MakeMoveRequest request, UUID gameId, UUID authenticatedPlayerId) {
         Game game = gameRepository.findByIdForUpdate(gameId)
                 .orElseThrow(() -> new GameNotFoundException("Partida não encontrada"));
@@ -61,6 +63,14 @@ public class MoveService {
 
         PieceColor playerColor = colorFor(game, player);
         validateTurn(playerColor, moves.size());
+        Instant moveTime = Instant.now();
+        if (GameClock.snapshot(game, moves.size(), moveTime).remainingFor(playerColor) <= 0) {
+            GameResult result = playerColor == PieceColor.WHITE ? GameResult.BLACK_WIN : GameResult.WHITE_WIN;
+            game.finish(result);
+            gameRepository.save(game);
+            eventPublisher.publishEvent(new GameFinishedEvent(game.getId(), result));
+            throw new GameTimeExpiredException("O tempo deste jogador terminou");
+        }
 
         Position from = toPosition(request.getFromSquare());
         Position to = toPosition(request.getToSquare());
@@ -83,6 +93,8 @@ public class MoveService {
         if (checkService.isCheck(game.getBoard(), playerColor)) {
             throw new InvalidMoveException("O movimento deixa o próprio rei em xeque");
         }
+
+        GameClock.completeMove(game, playerColor, moves.size(), moveTime);
 
         PieceColor opponentColor = opposite(playerColor);
         if (checkService.isCheckMate(game.getBoard(), opponentColor, game.getMoves())) {
