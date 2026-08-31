@@ -2,6 +2,8 @@ package com.xadrez.chess_backend.config.infra;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,6 +27,11 @@ public class SecurityConfig {
         }
 
         @Bean
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration auth) throws Exception {
+                return auth.getAuthenticationManager();
+        }
+
+        @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
                 http
@@ -38,7 +45,9 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(
                                                                 "/auth/login",
-                                                                "/auth/register")
+                                                                "/auth/register",
+                                                                "/auth/refresh",
+                                                                "/auth/logout")
                                                 .permitAll()
 
                                                 .requestMatchers("/ws", "/ws/**")
@@ -54,6 +63,10 @@ public class SecurityConfig {
                                                 .hasRole("USER")
 
                                                 .anyRequest().authenticated())
+
+                                .exceptionHandling(exceptions -> exceptions
+                                                .authenticationEntryPoint((request, response, exception) ->
+                                                        response.sendError(401, "Unauthorized")))
 
                                 .addFilterBefore(
                                                 jwtAuthenticationFilter,

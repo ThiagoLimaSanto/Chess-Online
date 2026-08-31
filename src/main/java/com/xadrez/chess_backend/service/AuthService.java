@@ -2,22 +2,25 @@ package com.xadrez.chess_backend.service;
 
 import java.util.UUID;
 
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.xadrez.chess_backend.config.infra.JwtService;
 import com.xadrez.chess_backend.dto.auth.LoginRequest;
-import com.xadrez.chess_backend.dto.auth.LoginResponse;
 import com.xadrez.chess_backend.dto.auth.RegisterRequest;
 import com.xadrez.chess_backend.dto.user.UserResponse;
 import com.xadrez.chess_backend.enums.Role;
-import com.xadrez.chess_backend.exception.InvalidPasswordException;
 import com.xadrez.chess_backend.exception.UserNotFoundException;
+import com.xadrez.chess_backend.exception.InvalidRefreshTokenException;
 import com.xadrez.chess_backend.exception.UsernameAlreadyExistException;
 import com.xadrez.chess_backend.model.User;
 import com.xadrez.chess_backend.redis.OnlinePlayerService;
+import com.xadrez.chess_backend.redis.RefreshTokenService;
+import com.xadrez.chess_backend.record.AuthTokens;
 import com.xadrez.chess_backend.repository.UserRepository;
 import com.xadrez.chess_backend.utils.AuthenticationUtils;
 
@@ -31,8 +34,9 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final OnlinePlayerService onlinePlayerService;
-    private final UserDetailsService userDetailsService;
     private final PerformanceService performanceService;
+    private final AuthenticationManager authenticationManager;
+    private final RefreshTokenService refreshTokenService;
 
     public UserResponse me() {
         UUID userId = AuthenticationUtils.getAuthenticatedUserId();
@@ -42,20 +46,36 @@ public class AuthService {
         return new UserResponse(user);
     }
 
-    public LoginResponse login(LoginRequest request) {
-        User user = (User) userDetailsService.loadUserByUsername(request.getUsername());
+    public AuthTokens login(LoginRequest request) {
 
-        if (user == null)
-            throw new UserNotFoundException("Usuário ou senha incorretos");
+        var authenticationToken = new UsernamePasswordAuthenticationToken(
+                request.getUsername(),
+                request.getPassword());
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))
-            throw new InvalidPasswordException("Usuário ou senha incorretos");
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
-        String token = jwtService.generateToken(user.getId(), user.getRole());
+        User user = (User) authentication.getPrincipal();
+
+        String accessToken = jwtService.generateAccessToken(
+                user.getId(),
+                user.getRole());
+
+        String refreshToken = refreshTokenService.issue(user.getId());
 
         onlinePlayerService.setOnline(user.getId());
 
-        return new LoginResponse(token);
+        return new AuthTokens(accessToken, refreshToken);
+    }
+
+    public AuthTokens refresh(String refreshToken) {
+        UUID userId = refreshTokenService.consume(refreshToken);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidRefreshTokenException("Usuário do refresh token não existe"));
+
+        onlinePlayerService.setOnline(userId);
+        return new AuthTokens(
+                jwtService.generateAccessToken(userId, user.getRole()),
+                refreshTokenService.issue(userId));
     }
 
     @Transactional
@@ -75,8 +95,8 @@ public class AuthService {
         performanceService.createInitialPerformance(savedUser);
     }
 
-    public void logout() {
-        UUID userId = AuthenticationUtils.getAuthenticatedUserId();
-        onlinePlayerService.setOffline(userId);
+    public void logout(String refreshToken) {
+        refreshTokenService.revoke(refreshToken)
+                .ifPresent(onlinePlayerService::setOffline);
     }
 }

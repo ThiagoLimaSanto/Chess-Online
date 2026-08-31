@@ -45,7 +45,7 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
         try {
             String token = authorizationHeader.substring(7);
 
-            if (!jwtService.isValid(token)) {
+            if (!jwtService.isValidAccessToken(token)) {
                 return false;
             }
 

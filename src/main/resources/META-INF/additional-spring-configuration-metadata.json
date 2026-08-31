@@ -6,6 +6,36 @@
       "description": "Secret used to sign and validate JWT tokens."
     },
     {
+      "name": "jwt.access-token-expiration",
+      "type": "java.time.Duration",
+      "defaultValue": "15m",
+      "description": "Lifetime of access tokens."
+    },
+    {
+      "name": "jwt.refresh-token-expiration",
+      "type": "java.time.Duration",
+      "defaultValue": "7d",
+      "description": "Lifetime of refresh tokens and their Redis sessions."
+    },
+    {
+      "name": "jwt.refresh-cookie-secure",
+      "type": "java.lang.Boolean",
+      "defaultValue": false,
+      "description": "Whether the refresh-token cookie is restricted to HTTPS."
+    },
+    {
+      "name": "jwt.refresh-cookie-name",
+      "type": "java.lang.String",
+      "defaultValue": "chess-refresh-token",
+      "description": "Name of the HttpOnly refresh-token cookie."
+    },
+    {
+      "name": "jwt.refresh-cookie-same-site",
+      "type": "java.lang.String",
+      "defaultValue": "Lax",
+      "description": "SameSite policy of the refresh-token cookie."
+    },
+    {
       "name": "app.cors.allowed-origins",
       "type": "java.lang.String[]",
       "description": "Allowed HTTP CORS origins."

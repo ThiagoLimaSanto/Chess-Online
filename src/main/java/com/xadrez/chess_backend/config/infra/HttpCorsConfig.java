@@ -22,6 +22,7 @@ public class HttpCorsConfig {
         configuration.setAllowedOriginPatterns(java.util.Arrays.asList(corsProperties.allowedOrigins()));
         configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(java.util.List.of("Content-Type", "Authorization"));
+        configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

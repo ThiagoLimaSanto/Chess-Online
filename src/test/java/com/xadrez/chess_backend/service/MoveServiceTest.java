@@ -7,22 +7,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.time.Instant;
 
 import org.junit.jupiter.api.Test;
 
 import com.xadrez.chess_backend.dto.move.MakeMoveRequest;
 import com.xadrez.chess_backend.dto.move.MoveResponse;
-import com.xadrez.chess_backend.enums.PieceColor;
-import com.xadrez.chess_backend.exception.InvalidMoveException;
-import com.xadrez.chess_backend.exception.GameTimeExpiredException;
 import com.xadrez.chess_backend.enums.GameResult;
 import com.xadrez.chess_backend.enums.GameStatus;
+import com.xadrez.chess_backend.exception.GameTimeExpiredException;
+import com.xadrez.chess_backend.exception.InvalidMoveException;
 import com.xadrez.chess_backend.exception.NotYourTurnException;
 import com.xadrez.chess_backend.factory.BoardFactory;
 import com.xadrez.chess_backend.factory.ChessPromotionFactory;
