@@ -30,6 +30,8 @@ import com.xadrez.chess_backend.record.Position;
 import com.xadrez.chess_backend.repository.GameRepository;
 import com.xadrez.chess_backend.repository.MoveRepository;
 import com.xadrez.chess_backend.repository.UserRepository;
+import com.xadrez.chess_backend.validation.move.MoveValidationChain;
+import com.xadrez.chess_backend.validation.move.MoveValidationContext;
 
 import lombok.RequiredArgsConstructor;
 
@@ -45,6 +47,7 @@ public class MoveService {
     private final SpecialMoveService specialMoveService;
     private final GameRestorationService gameRestorationService;
     private final ApplicationEventPublisher eventPublisher;
+    private final MoveValidationChain moveValidationChain;
 
     @Transactional
     public MoveResponse makeMove(MakeMoveRequest request, UUID gameId) {
@@ -76,15 +79,8 @@ public class MoveService {
         Position to = toPosition(request.getToSquare());
         Piece movingPiece = game.getBoard().getPiece(from);
 
-        if (movingPiece == null) {
-            throw new InvalidMoveException("Não há peça na casa de origem");
-        }
-        if (movingPiece.getColor() != playerColor) {
-            throw new InvalidMoveException("A peça escolhida não pertence ao jogador");
-        }
-        if (game.getBoard().getPiece(to) instanceof King) {
-            throw new InvalidMoveException("Não é permitido capturar o rei");
-        }
+        moveValidationChain.validate(new MoveValidationContext(
+                movingPiece, game.getBoard().getPiece(to), playerColor));
 
         Move move = new Move(game, player, from, to, request.getPromotionType(), moves.size() + 1);
         game.makeMove(move);

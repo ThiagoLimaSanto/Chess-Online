@@ -1,6 +1,5 @@
 package com.xadrez.chess_backend.service;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.xadrez.chess_backend.dto.game.CreateGameRequest;
 import com.xadrez.chess_backend.dto.game.GameDetailsResponse;
 import com.xadrez.chess_backend.dto.game.GameResponse;
-import com.xadrez.chess_backend.dto.game.PiecePositionResponse;
 import com.xadrez.chess_backend.dto.game.DrawOfferResponse;
 import com.xadrez.chess_backend.dto.history.PlayerGameHistoryResponse;
 import com.xadrez.chess_backend.dto.move.MoveHistoryResponse;
@@ -40,6 +38,7 @@ import com.xadrez.chess_backend.redis.DrawOfferStore;
 import com.xadrez.chess_backend.repository.GameRepository;
 import com.xadrez.chess_backend.repository.MoveRepository;
 import com.xadrez.chess_backend.repository.UserRepository;
+import com.xadrez.chess_backend.proxy.BoardQuery;
 
 import lombok.RequiredArgsConstructor;
 
@@ -54,6 +53,7 @@ public class GameService {
     private final GameRestorationService gameRestorationService;
     private final ApplicationEventPublisher eventPublisher;
     private final DrawOfferStore drawOfferStore;
+    private final BoardQuery boardQuery;
 
     @Transactional
     public GameResponse createGame(CreateGameRequest request) {
@@ -92,19 +92,11 @@ public class GameService {
         Game game = findGame(gameId);
         ensurePlayerBelongsToGame(game, playerId);
         List<Move> moves = moveRepository.findByGameIdOrderByMoveNumberAsc(gameId);
-        gameRestorationService.restore(game, moves);
-
-        List<PiecePositionResponse> board = game.getBoard().getPieces().entrySet().stream()
-                .sorted(Comparator.comparingInt((
-                        java.util.Map.Entry<com.xadrez.chess_backend.record.Position, com.xadrez.chess_backend.model.chess.Piece> entry) -> entry
-                                .getKey().row())
-                        .thenComparingInt(entry -> entry.getKey().column()))
-                .map(entry -> new PiecePositionResponse(entry.getKey(), entry.getValue()))
-                .toList();
+        var board = boardQuery.getBoard(gameId, moves);
 
         return new GameDetailsResponse(
                 game,
-                board,
+                board.pieces(),
                 toMoveHistory(moves),
                 GameClock.snapshot(game, moves.size(), Instant.now()));
     }

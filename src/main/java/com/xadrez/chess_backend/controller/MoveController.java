@@ -19,8 +19,7 @@ import com.xadrez.chess_backend.dto.move.MakeMoveRequest;
 import com.xadrez.chess_backend.dto.move.MoveHistoryResponse;
 import com.xadrez.chess_backend.dto.move.MoveResponse;
 import com.xadrez.chess_backend.model.User;
-import com.xadrez.chess_backend.service.GameService;
-import com.xadrez.chess_backend.service.MoveService;
+import com.xadrez.chess_backend.facade.GameFacade;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,15 +29,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MoveController {
 
-    private final MoveService moveService;
-    private final GameService gameService;
+    private final GameFacade gameFacade;
 
     @PostMapping("/{gameId}/moves")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<MoveResponse> makeMove(@Valid @RequestBody MakeMoveRequest request,
             @PathVariable UUID gameId,
             @AuthenticationPrincipal User authenticatedUser) {
-        MoveResponse response = moveService.makeMove(request, gameId, authenticatedUser.getId());
+        MoveResponse response = gameFacade.makeMove(request, gameId, authenticatedUser.getId());
         return ResponseEntity.ok(response);
     }
 
@@ -46,7 +44,7 @@ public class MoveController {
     public ResponseEntity<List<MoveHistoryResponse>> getMoves(
             @PathVariable UUID gameId,
             @AuthenticationPrincipal User authenticatedUser) {
-        List<MoveHistoryResponse> response = gameService.getMoveHistory(gameId, authenticatedUser.getId());
+        List<MoveHistoryResponse> response = gameFacade.getMoveHistory(gameId, authenticatedUser.getId());
         return ResponseEntity.ok(response);
     }
 
@@ -55,6 +53,6 @@ public class MoveController {
             @PathVariable UUID gameId,
             @RequestParam String from,
             @AuthenticationPrincipal User authenticatedUser) {
-        return ResponseEntity.ok(moveService.getLegalMoves(gameId, from, authenticatedUser.getId()));
+        return ResponseEntity.ok(gameFacade.getLegalMoves(gameId, from, authenticatedUser.getId()));
     }
 }

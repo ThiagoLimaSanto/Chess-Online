@@ -177,7 +177,7 @@ class ChallengeServiceTest {
         private GameResponse createdGame;
 
         StubGameService() {
-            super(null, null, null, null, null, null, null);
+            super(null, null, null, null, null, null, null, null);
         }
 
         @Override

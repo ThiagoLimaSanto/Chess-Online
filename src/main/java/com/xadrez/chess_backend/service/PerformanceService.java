@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PerformanceService {
 
-    private static final int DEFAULT_RATING = 1200;
+    private static final int DEFAULT_RATING = Performance.INITIAL_RATING;
     private static final int ELO_K_FACTOR = 32;
 
     private final PerformanceRepository performanceRepository;
@@ -37,7 +37,7 @@ public class PerformanceService {
         performance.setVictory(0);
         performance.setDraw(0);
         performance.setLoss(0);
-        performance.setRating(1200);
+        performance.setRating(DEFAULT_RATING);
 
         return performanceRepository.save(performance);
     }

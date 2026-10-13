@@ -19,6 +19,30 @@ import com.xadrez.chess_backend.repository.PerformanceRepository;
 class PerformanceServiceTest {
 
     @Test
+    void newPlayersStartWithRating100() {
+        PerformanceRepository repository = proxy(PerformanceRepository.class, (method, args) ->
+                method.getName().equals("save") ? args[0] : null);
+        User user = new User();
+        Performance performance = new PerformanceService(repository, null).createInitialPerformance(user);
+
+        assertEquals(100, performance.getRating());
+        assertEquals(0, performance.getGamesPlayed());
+        assertEquals(100, new Performance(user).getRating());
+    }
+
+    @Test
+    void updatesEloForNewPlayersAndKeepsTheMinimumRating() throws Exception {
+        Fixture fixture = fixture();
+        fixture.whitePerformance.setRating(100);
+        fixture.blackPerformance.setRating(100);
+
+        fixture.service.registerGameResult(fixture.gameId, GameResult.WHITE_WIN);
+
+        assertEquals(116, fixture.whitePerformance.getRating());
+        assertEquals(100, fixture.blackPerformance.getRating());
+    }
+
+    @Test
     void registersVictoryLossAndEloForBothPlayers() throws Exception {
         Fixture fixture = fixture();
 

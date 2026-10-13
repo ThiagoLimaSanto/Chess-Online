@@ -20,6 +20,8 @@ import lombok.Setter;
 @Getter
 public class Performance {
 
+    public static final int INITIAL_RATING = 100;
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -51,6 +53,6 @@ public class Performance {
         this.victory = 0;
         this.draw = 0;
         this.loss = 0;
-        this.rating = 500;
+        this.rating = INITIAL_RATING;
     }
 }

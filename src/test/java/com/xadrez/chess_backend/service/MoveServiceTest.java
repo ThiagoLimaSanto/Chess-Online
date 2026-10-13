@@ -44,6 +44,7 @@ import com.xadrez.chess_backend.strategy.chess.MoveStrategyFactory;
 import com.xadrez.chess_backend.strategy.chess.PawnMoveStrategy;
 import com.xadrez.chess_backend.strategy.chess.QueenMoveStrategy;
 import com.xadrez.chess_backend.strategy.chess.RookMoveStrategy;
+import com.xadrez.chess_backend.validation.move.MoveValidationChain;
 
 class MoveServiceTest {
 
@@ -90,6 +91,19 @@ class MoveServiceTest {
         assertThrows(InvalidMoveException.class, () -> fixture.service.makeMove(
                 request(fixture.white.getId(), "e3", "e4"), fixture.gameId, fixture.white.getId()));
         assertEquals(false, fixture.moveSaved.get());
+    }
+
+    @Test
+    void rejectsKingCaptureWithoutSavingOrPublishingEvents() throws Exception {
+        Fixture fixture = fixture();
+
+        InvalidMoveException error = assertThrows(InvalidMoveException.class, () -> fixture.service.makeMove(
+                request(fixture.white.getId(), "e2", "e8"), fixture.gameId, fixture.white.getId()));
+
+        assertEquals("Não é permitido capturar o rei", error.getMessage());
+        assertEquals(false, fixture.moveSaved.get());
+        assertEquals(false, fixture.gameSaved.get());
+        assertTrue(fixture.events.isEmpty());
     }
 
     @Test
@@ -157,7 +171,7 @@ class MoveServiceTest {
         DrawService drawService = new DrawService(restorationService);
         MoveService service = new MoveService(
                 moveRepository, gameRepository, userRepository, checkService, drawService,
-                specialMoveService, restorationService, events::add);
+                specialMoveService, restorationService, events::add, new MoveValidationChain());
 
         return new Fixture(gameId, white, game, moves, moveSaved, gameSaved, events, service);
     }

@@ -1,0 +1,1 @@
+ALTER TABLE performances ALTER COLUMN rating SET DEFAULT 100;

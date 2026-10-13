@@ -42,7 +42,7 @@ class GameServiceTest {
         List<Object> events = new ArrayList<>();
         GameRepository gameRepository = gameRepositoryFor(game);
         org.springframework.context.ApplicationEventPublisher publisher = events::add;
-        GameService service = new GameService(gameRepository, null, null, null, null, publisher, offerStore);
+        GameService service = new GameService(gameRepository, null, null, null, null, publisher, offerStore, null);
 
         assertEquals(whiteId, service.offerDraw(gameId, whiteId).offeredByPlayerId());
         assertEquals(whiteId, offerStore.findOfferer(gameId).orElseThrow());
@@ -81,7 +81,7 @@ class GameServiceTest {
         };
         org.springframework.context.ApplicationEventPublisher publisher = event -> { };
         GameService service = new GameService(gameRepository, null, null, moveRepository,
-                restorationService, publisher, offerStore);
+                restorationService, publisher, offerStore, null);
 
         service.respondToDrawOffer(gameId, blackId, true);
 
@@ -100,7 +100,7 @@ class GameServiceTest {
         TestDrawOfferStore offerStore = new TestDrawOfferStore();
         offerStore.save(gameId, whiteId);
         GameService service = new GameService(gameRepositoryFor(game), null, null, null, null,
-                event -> { }, offerStore);
+                event -> { }, offerStore, null);
 
         service.respondToDrawOffer(gameId, blackId, false);
 
@@ -120,7 +120,7 @@ class GameServiceTest {
             if (method.getName().equals("findById")) return Optional.of(game);
             return null;
         });
-        GameService service = new GameService(gameRepository, null, null, null, null, null, null);
+        GameService service = new GameService(gameRepository, null, null, null, null, null, null, null);
 
         assertThrows(PlayerNotInGameException.class,
                 () -> service.getGameDetails(UUID.randomUUID(), outsiderId));
@@ -138,7 +138,7 @@ class GameServiceTest {
             if (method.getName().equals("findById")) return Optional.of(game);
             return null;
         });
-        GameService service = new GameService(gameRepository, null, null, null, null, null, null);
+        GameService service = new GameService(gameRepository, null, null, null, null, null, null, null);
 
         assertThrows(PlayerNotInGameException.class,
                 () -> service.getMoveHistory(UUID.randomUUID(), outsiderId));
@@ -169,7 +169,7 @@ class GameServiceTest {
             return new Game();
         };
         GameService service = new GameService(gameRepository, userRepository, gameFactory,
-                null, null, null, null);
+                null, null, null, null, null);
 
         CreateGameRequest request = new CreateGameRequest();
         request.setWhitePlayer(whiteId);

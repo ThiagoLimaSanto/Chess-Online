@@ -23,7 +23,7 @@ import com.xadrez.chess_backend.dto.game.RespondDrawOfferRequest;
 import com.xadrez.chess_backend.dto.history.PlayerGameHistoryResponse;
 import com.xadrez.chess_backend.model.User;
 import com.xadrez.chess_backend.record.PageResponse;
-import com.xadrez.chess_backend.service.GameService;
+import com.xadrez.chess_backend.facade.GameFacade;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,12 +33,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GameController {
 
-    private final GameService gameService;
+    private final GameFacade gameFacade;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<GameResponse> createGame(@Valid @RequestBody CreateGameRequest request) {
-        GameResponse response = gameService.createGame(request);
+        GameResponse response = gameFacade.createGame(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -46,7 +46,7 @@ public class GameController {
     public ResponseEntity<GameDetailsResponse> getGame(
             @PathVariable UUID gameId,
             @AuthenticationPrincipal User authenticatedUser) {
-        GameDetailsResponse response = gameService.getGameDetails(gameId, authenticatedUser.getId());
+        GameDetailsResponse response = gameFacade.getGameDetails(gameId, authenticatedUser.getId());
         return ResponseEntity.ok(response);
     }
 
@@ -54,7 +54,7 @@ public class GameController {
     public ResponseEntity<PageResponse<PlayerGameHistoryResponse>> getHistory(
             @PathVariable UUID userId,
             @PageableDefault(size = 5) Pageable pageable) {
-        return ResponseEntity.ok(gameService.getHistory(userId, pageable));
+        return ResponseEntity.ok(gameFacade.getHistory(userId, pageable));
     }
 
     @PostMapping("/{gameId}/abandon")
@@ -62,7 +62,7 @@ public class GameController {
     public ResponseEntity<Void> abandonGame(
             @PathVariable UUID gameId,
             @AuthenticationPrincipal User authenticatedUser) {
-        gameService.abandonGame(gameId, authenticatedUser.getId());
+        gameFacade.abandonGame(gameId, authenticatedUser.getId());
         return ResponseEntity.noContent().build();
     }
 
@@ -70,14 +70,14 @@ public class GameController {
     public ResponseEntity<DrawOfferResponse> getDrawOffer(
             @PathVariable UUID gameId,
             @AuthenticationPrincipal User authenticatedUser) {
-        return ResponseEntity.ok(gameService.getDrawOffer(gameId, authenticatedUser.getId()));
+        return ResponseEntity.ok(gameFacade.getDrawOffer(gameId, authenticatedUser.getId()));
     }
 
     @PostMapping("/{gameId}/draw-offer")
     public ResponseEntity<DrawOfferResponse> offerDraw(
             @PathVariable UUID gameId,
             @AuthenticationPrincipal User authenticatedUser) {
-        return ResponseEntity.ok(gameService.offerDraw(gameId, authenticatedUser.getId()));
+        return ResponseEntity.ok(gameFacade.offerDraw(gameId, authenticatedUser.getId()));
     }
 
     @PostMapping("/{gameId}/draw-offer/respond")
@@ -86,7 +86,7 @@ public class GameController {
             @PathVariable UUID gameId,
             @Valid @RequestBody RespondDrawOfferRequest request,
             @AuthenticationPrincipal User authenticatedUser) {
-        gameService.respondToDrawOffer(gameId, authenticatedUser.getId(), request.accepted());
+        gameFacade.respondToDrawOffer(gameId, authenticatedUser.getId(), request.accepted());
         return ResponseEntity.noContent().build();
     }
 }

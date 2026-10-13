@@ -3,6 +3,7 @@ package com.xadrez.chess_backend.service;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import com.xadrez.chess_backend.exception.IllegalRequestFriendship;
 import com.xadrez.chess_backend.model.Friendship;
 import com.xadrez.chess_backend.model.User;
 import com.xadrez.chess_backend.record.PageResponse;
+import com.xadrez.chess_backend.record.FriendshipChangedEvent;
 import com.xadrez.chess_backend.repository.FriendshipRepository;
 import com.xadrez.chess_backend.repository.UserRepository;
 import com.xadrez.chess_backend.utils.AuthenticationUtils;
@@ -27,6 +29,7 @@ public class FriendshipService {
 
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public PageResponse<FriendshipResponse> getFriends(
             String username,
@@ -122,6 +125,7 @@ public class FriendshipService {
         Friendship friendship = new Friendship(requester, receiver);
 
         friendshipRepository.save(friendship);
+        eventPublisher.publishEvent(new FriendshipChangedEvent(requesterId, receiverId));
     }
 
     @Transactional
@@ -137,6 +141,7 @@ public class FriendshipService {
         friendship.accept();
 
         friendshipRepository.save(friendship);
+        eventPublisher.publishEvent(new FriendshipChangedEvent(requesterId, receiverId));
     }
 
     @Transactional
@@ -152,6 +157,7 @@ public class FriendshipService {
         friendship.reject();
 
         friendshipRepository.save(friendship);
+        eventPublisher.publishEvent(new FriendshipChangedEvent(requesterId, receiverId));
     }
 
 }
